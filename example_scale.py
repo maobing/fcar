@@ -2,7 +2,7 @@ import os.path, time
 
 trainTF = ['CMYC']
 testTF = ['CTCF','E2F','EGR1','GABP','NRSF','SRF','USF1']
-model = 'LogisticRegressionL1,RandomForest'
+model = 'LogisticRegressionL1,LogisticRegressionL2,RandomForest'
 
 k = 10
 for trTF in trainTF :
