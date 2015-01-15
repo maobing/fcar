@@ -268,7 +268,7 @@ int parseParam(char *paramFile, struct extractFeatureParam *param){
 			printf("/* %s is %s\n", name, value);
 		}
 		else if (strcmp(name, "pairend") == 0) {
-			strcpy(param->pairend, value);
+			param->pairend = atoi(value);
 			printf("/* %s is %s\n", name, value);
 		}
 		else {

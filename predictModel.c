@@ -124,7 +124,7 @@ int predictModel(char *method, char *trainedModel, char *trainFile, char *testFi
   
   int col;
   strcpy(tmpcmd, "awk -F' ' '{print NF; exit}' ");
-  strcat(tmpcmd, trainingFile);
+  strcat(tmpcmd, trainFile);
   tmpFp = popen(tmpcmd, "r");
   fscanf(tmpFp, "%d\n", &col);
   pclose(tmpFp);
@@ -147,7 +147,7 @@ int predictModel(char *method, char *trainedModel, char *trainFile, char *testFi
     char tmpStr[10];
     
     strcpy(cmd, "python ./rt-rank_1.5/do_forest-class.py ");
-    strcat(cmd, trainingFile);
+    strcat(cmd, trainFile);
     strcat(cmd, " ");
 
     sprintf(tmpStr, "%d ", col-1);
