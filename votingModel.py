@@ -139,14 +139,14 @@ def trainModels(trainFile, bmTrainFile, testFile, bmTestFile, model) :
     myargs = shlex.split(cmd);
     start = time.time()
     p = subprocess.Popen(myargs, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    elapsed = time.time() - start
-    print 'elapsed time: %.8f' % elapsed
     for x in p.stdout.read().split('\n') :
       if re.search(r"Accuracy|nonzero", x) :
         print x
     for x in p.stderr.read().split('\n') :
        if re.search(r"Accuracy|core", x) :
          print x
+    elapsed = time.time() - start
+    print 'elapsed time: %.8f' % elapsed
 
 #---
 # predictModels
@@ -173,15 +173,14 @@ def predictModels(trainFile, bmTrainFile, testFile, bmTestFile, model):
     myargs = shlex.split(cmd)
     start = time.time()
     p = subprocess.Popen(myargs, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    elapsed = time.time() - start
-    print 'elapsed time: %.8f' % elapsed
-
     for x in p.stdout.read().split('\n') :
       if re.search(r"Accuracy", x) :
         print x  
     for x in p.stderr.read().split('\n') :
       if re.search(r"Accuracy|core", x) :
         print x
+    elapsed = time.time() - start
+    print 'elapsed time: %.8f' % elapsed
 
 #---
 # collectResults

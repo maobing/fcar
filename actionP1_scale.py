@@ -4,7 +4,11 @@ import subprocess, shlex
 TFs = ['CMYC','CTCF','E2F','EGR1','GABP','NRSF','SRF','USF1']
 model = 'LogisticRegressionL1,LogisticRegressionL2,RandomForest'
 
-# scaled DNase+Histone
+for TF in TFs :
+  trainTF = [TF]
+  testTF = [ a for a in TFs if a != TF ]
+
+  # scaled DNase+Histone
   k = 10
   for trTF in trainTF :
     for teTF in testTF :
@@ -12,7 +16,7 @@ model = 'LogisticRegressionL1,LogisticRegressionL2,RandomForest'
       subprocess.call(shlex.split(cmd))
       print cmd
 
-# scaled DNaseFlash
+  # scaled DNaseFlash
   k = 2
   for trTF in trainTF :
     for teTF in testTF :

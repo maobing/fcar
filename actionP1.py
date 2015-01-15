@@ -4,12 +4,12 @@ import subprocess, shlex
 TFs = ['CMYC','CTCF','E2F','EGR1','GABP','NRSF','SRF','USF1']
 model = 'LogisticRegressionL1,LogisticRegressionL2,RandomForest'
 
-# DNase+Histone
-k = 10
 for TF in TFs :
   trainTF = [TF]
   testTF = [ a for a in TFs if a != TF ]
-  
+
+  # DNase+Histone
+  k = 10 
   for trTF in trainTF :
     for teTF in testTF :
       cmd = 'python votingModel.py -model %s -train ../%sOutputFeature_2cat.txt_5_1000 -test ../%sOutputFeature_2cat.txt_5_1000 -output default -k %d' % (model, trTF, teTF, k)

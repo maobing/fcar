@@ -19,8 +19,12 @@ for(i in 2:ncol(testFile)) {
 roc <- function(prediction, truth) {
   prediction = as.numeric(prediction)
   truth = as.numeric(truth)
-	# cutoff = seq(0,1,by=0.05)
-  cutoff = sort(unique(prediction))
+	knots = unique(prediction)
+  if(length(knots) <= 1) {
+    cutoff = seq(0,1,by=0.1)
+  } else {
+    cutoff = sort(unique(prediction))
+  }
 	TPR = vector("numeric", length(cutoff))
 	FPR = vector("numeric", length(cutoff))
 	for(i in 1:length(cutoff)) {
@@ -51,8 +55,8 @@ plot(NA, xlim=c(0,1),ylim=c(0,1), xlab = "FPR", ylab = "TPR",
 	main = paste0(substr(args[1],1,23),"\n",substr(args[1],24,nchar(args[1]))))
 
 for(i in 2:ncol(testFile)) {
-  i = 3; mylty = 1
-	if(models[i-1] == "voting" || models[i-1] == "Benchmark") {
+  # i = 3; mylty = 1
+	if(models[i-1] == "voting" || models[i-1] == "Benchmark" || models[i-1] == "RandomForest") {
 		mylty = 1
 	}
 	else {
@@ -70,5 +74,6 @@ dev.off()
 sink(file = paste0(args[1],"_auc"), append = TRUE)
 cat(paste0(args[1],"\n"))
 cat(paste0(models,collapse = " "))
+cat("\n")
 cat(paste0(paste0(aucs,collapse = " "),"\n"))
 sink(NULL)
