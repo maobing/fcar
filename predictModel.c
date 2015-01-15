@@ -118,11 +118,57 @@ int predictModel(char *method, char *trainedModel, char *trainFile, char *testFi
 
   char *cmd = (char *)calloc(MAX_DIR_LEN, sizeof(char));
   
+  // automatically determine num of features
+  char *tmpcmd = (char *)calloc(MAX_DIR_LEN, sizeof(char));
+  FILE *tmpFp;
+  
+  int col;
+  strcpy(tmpcmd, "awk -F' ' '{print NF; exit}' ");
+  strcat(tmpcmd, trainingFile);
+  tmpFp = popen(tmpcmd, "r");
+  fscanf(tmpFp, "%d\n", &col);
+  pclose(tmpFp);
+ 
+  /*
+  int row;
+  strcpy(tmpcmd, "wc -l ");
+  strcat(tmpcmd, trainingFile);
+  tmpFp = popen(tmpcmd, "r");
+  fscanf(tmpFp, "%d ", &row);
+  pclose(tmpFp);
+  */
+
+  free(tmpcmd);
+
   if(strcmp(method, "SVM") == 0) {
     strcpy(cmd, "./liblinear-1.96/predict testFile trainedModel ");
   }
   else if (strcmp(method, "RandomForest") == 0) {
-    strcpy(cmd, "");
+    char tmpStr[10];
+    
+    strcpy(cmd, "python ./rt-rank_1.5/do_forest-class.py ");
+    strcat(cmd, trainingFile);
+    strcat(cmd, " ");
+
+    sprintf(tmpStr, "%d ", col-1);
+    strcat(cmd, tmpStr);
+    sprintf(tmpStr, "%d ", (int)((col-1)*0.1));
+    strcat(cmd, tmpStr);
+
+    strcat(cmd, "100 8 > ");   
   }
+  else {
+    strcpy(cmd, "./liblinear-1.96/predict -b 1 testFile trainedModel ");
+  }
+
+  strcat(cmd, outputFile);
+
+  // predict model
+  printf("Predicting model %s:\n", method);
+  printf("cmd is %s\n", cmd);
+  system(cmd);
+
+  free(cmd);
+  return 0;
 }
 

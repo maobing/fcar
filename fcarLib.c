@@ -267,8 +267,8 @@ int parseParam(char *paramFile, struct extractFeatureParam *param){
 			param->windowSize = atoi(value);
 			printf("/* %s is %s\n", name, value);
 		}
-		else if (strcmp(name, "method") == 0) {
-			strcpy(param->method, value);
+		else if (strcmp(name, "pairend") == 0) {
+			strcpy(param->pairend, value);
 			printf("/* %s is %s\n", name, value);
 		}
 		else {
