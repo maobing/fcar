@@ -17,7 +17,10 @@ for(i in 2:ncol(testFile)) {
 
 # plot
 roc <- function(prediction, truth) {
-	cutoff = seq(0,1,by=0.05)
+  prediction = as.numeric(prediction)
+  truth = as.numeric(truth)
+	# cutoff = seq(0,1,by=0.05)
+  cutoff = sort(unique(prediction))
 	TPR = vector("numeric", length(cutoff))
 	FPR = vector("numeric", length(cutoff))
 	for(i in 1:length(cutoff)) {
@@ -48,6 +51,7 @@ plot(NA, xlim=c(0,1),ylim=c(0,1), xlab = "FPR", ylab = "TPR",
 	main = paste0(substr(args[1],1,23),"\n",substr(args[1],24,nchar(args[1]))))
 
 for(i in 2:ncol(testFile)) {
+  i = 3; mylty = 1
 	if(models[i-1] == "voting" || models[i-1] == "Benchmark") {
 		mylty = 1
 	}
