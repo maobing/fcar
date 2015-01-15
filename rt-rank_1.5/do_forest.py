@@ -14,9 +14,9 @@ PROCESSORS=int(sys.argv[6])
 ITER=1;
 DEPTH=-1;
 
-cmdline = './cart/rtrank %s %s /dev/null -F -f %d -t %d -k %i -p %i -r 1 -a 1 -z' %  (INPUTDATA,TESTDATA,NUMFEATURES,TREES,K,PROCESSORS)
+cmdline = './rt-rank_1.5//cart/rtrank %s %s /dev/null -F -f %d -t %d -k %i -p %i -r 1 -a 1 -z' %  (INPUTDATA,TESTDATA,NUMFEATURES,TREES,K,PROCESSORS)
 args = shlex.split(cmdline);
-
+# print args
 # start loading the data
 p = subprocess.Popen(args, stdin=subprocess.PIPE,stdout=subprocess.PIPE);
 
