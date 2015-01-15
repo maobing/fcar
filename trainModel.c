@@ -183,7 +183,6 @@ int trainModel(char *method, float c, char *trainingFile, char *outputFile) {
 	} */
 
 	strcat(cmd, outputFile);
-	printf ("cmd: %s\n", cmd);
 
 	// train model
 	printf("Training model %s:\n", method);
