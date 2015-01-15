@@ -141,13 +141,19 @@ int predictModel(char *method, char *trainedModel, char *trainFile, char *testFi
   free(tmpcmd);
 
   if(strcmp(method, "SVM") == 0) {
-    strcpy(cmd, "./liblinear-1.96/predict testFile trainedModel ");
+    strcpy(cmd, "./liblinear-1.96/predict ");
+    strcat(cmd, testFile);
+    strcat(cmd, " ");
+    strcat(cmd, trainedModel);
+    strcat(cmd, " ");
   }
   else if (strcmp(method, "RandomForest") == 0) {
     char tmpStr[10];
     
     strcpy(cmd, "python ./rt-rank_1.5/do_forest-class.py ");
     strcat(cmd, trainFile);
+    strcat(cmd, " ");
+    strcat(cmd, testFile);
     strcat(cmd, " ");
 
     sprintf(tmpStr, "%d ", col-1);
@@ -158,7 +164,11 @@ int predictModel(char *method, char *trainedModel, char *trainFile, char *testFi
     strcat(cmd, "100 8 > ");   
   }
   else {
-    strcpy(cmd, "./liblinear-1.96/predict -b 1 testFile trainedModel ");
+    strcpy(cmd, "./liblinear-1.96/predict -b 1 ");
+    strcat(cmd, testFile);
+    strcat(cmd, " ");
+    strcat(cmd, trainedModel);
+    strcat(cmd, " ");
   }
 
   strcat(cmd, outputFile);
