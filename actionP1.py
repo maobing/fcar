@@ -1,4 +1,5 @@
 import os.path, time
+import subprocess, shlex
 
 TFs = ['CMYC','CTCF','E2F','EGR1','GABP','NRSF','SRF','USF1']
 model = 'LogisticRegressionL1,LogisticRegressionL2,RandomForest'
