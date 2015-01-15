@@ -19,7 +19,7 @@ int menu_extractFeature(int argc, char **argv) {
 	/* ------------------------------- */
 	/*        extractFeature           */
 	/* -i bamsFile                     */
-	/* -t trainingFile                 */
+	/* -t traini region coordinate     */
 	/* -o outputFile                   */
 	/* -p paramFile                    */
 	/* ------------------------------- */
@@ -28,7 +28,7 @@ int menu_extractFeature(int argc, char **argv) {
 		printf("/*-----------------------------------*/\n");
 		printf("/*            extractFeature         */\n");
 		printf("/* -i bams file list                 */\n");
-		printf("/* -t training data file             */\n");
+		printf("/* -t training region coordinate     */\n");
 		printf("/* -o output file                    */\n");
 		printf("/* -p parameter setting file         */\n");
 		printf("/*-----------------------------------*/\n");
