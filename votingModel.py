@@ -313,10 +313,10 @@ def main(argv) :
   testResult.append(votedResult)
   model.append('voting')
 
-  ## overwrite outputfile
+  ## overwrite outputfile name
   tmpmodel = list(set([ a.split('_')[0] for a in model]))
-  outputFile = ''.join( ['../train',os.path.basename(trainFile)[:4],'predict', \
-      os.path.basename(testFile)[:4],','.join(tmpmodel), '_result'] )
+  outputFile = ''.join( ['../',os.path.basename(trainFile), \
+      os.path.basename(testFile),','.join(tmpmodel), '_result'] )
 
   writeFormatted(testYs, testResult, outputFile)
 
