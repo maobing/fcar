@@ -1,1 +1,1 @@
-python example_scale.py
+python actionP1.py
