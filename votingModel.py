@@ -104,7 +104,7 @@ def addDiffPenalty(model,cs) :
       rmModel.append(m)
 
   for a in rmModel :
-	model.remove(a) # remove
+  model.remove(a) # remove
 
   model.extend(tmpModel)
 
