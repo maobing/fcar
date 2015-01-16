@@ -349,11 +349,11 @@ int coverage(char *bamsFile, struct extractFeatureParam *param) {
 /*--------------------------------*/
 /*         coverage_core          */
 /* count coverage core            */
-/* 09-09-2014 */
-/* @UPDATE: currently, each read contribute to only one bin's signal,*/
+/* 09-09-2014 @UPDATE: previously,  each read contribute to only one bin's signal,*/
 /* 	We now update it to contribute to all the bins covered by it. */
 /* 	This is necessary because when the resolution is high (10bp), */
 /* 	the old way will cause the signal to be not smooth and too sparse */
+/* 01-16-2015 @UPDATE: added pair-end coverage counting */
 /*--------------------------------*/
 int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param) {
 
@@ -415,6 +415,9 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
 
 	read = bam_init1();
 
+  // added for pair end coverage counting
+  int is2ndMate = 0;
+
 	while (samread(bamFp, read) > 0) {
 		if (read->core.tid < 0 || read->core.tid > 23) {
 			continue;
@@ -422,8 +425,32 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
 		/* @UPDATE on 09-09-2014 */
 		/* increment signals at all covered bins */
 		if (tidmap[read->core.tid] < NUM_SEQ) {
-			int startBin = (int)((float)read->core.pos / (float)param->resolution + 0.5);
-			int endBin = (int)((float)(read->core.pos + read->core.l_qseq) / (float)param->resolution + 0.5);
+      int startBin, endBin;
+      if(param->pairend == 0) { // if single-ended
+			  startBin = (int)((float)read->core.pos / (float)param->resolution + 0.5);
+			  endBin = (int)((float)(read->core.pos + read->core.l_qseq) / (float)param->resolution + 0.5);
+      }
+      else {
+        if(is2ndMate == 1) {
+          is2ndMate = 0; // assuming bam is sorted by id number
+          continue;
+        } else {
+          uint32_t left, right;
+          if(read->core.pos > read->core.mpos) {
+            left = read->core.mpos;
+            right = read->core.pos;
+          }
+          else {
+            left = read->core.pos;
+            right = read->core.mpos;
+          }
+
+  			  startBin = (int)((float) left / (float)param->resolution + 0.5);
+	  		  endBin = (int)((float)(right + read->core.l_qseq) / (float)param->resolution + 0.5);
+           
+        }
+        is2ndMate = 1;
+      }
 			int b;
 			// printf("startBin is %d and endBin is %d\n", startBin, endBin);
 			for(b = startBin; b <= endBin; b++) {
