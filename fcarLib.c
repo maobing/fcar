@@ -48,6 +48,7 @@ int extractFeature(char *bamsFile, char *trainingFile, char *outputFile, char *p
 /*-----------------------------------------*/
 /*          saveModelMatrix                */
 /* save modelMatirx                        */
+/* i.e., extracted features                */
 /*-----------------------------------------*/
 int saveModelMatrix(struct modelMatrix *modelMatrix, struct extractFeatureParam *param, char *outputFile) {
 	
@@ -68,13 +69,14 @@ int saveModelMatrix(struct modelMatrix *modelMatrix, struct extractFeatureParam 
 		printf("Error: cannot open file %s\n", outputFileName);
 		exit(EXIT_FAILURE);
 	}
-
+  // changed input format to below: 
+  // 1 1:1.234 2:3.497
 	for (i = 0; i < modelMatrix->n; i++) {
-		fprintf(outputFileFp, "%d\t", modelMatrix->trainingRegions[i].response);
+		fprintf(outputFileFp, "%d ", modelMatrix->trainingRegions[i].response);
 		for (j = 0; j < modelMatrix->p-1; j++) {
-			fprintf(outputFileFp, "%.4f\t", modelMatrix->features[i][j]);
+			fprintf(outputFileFp, "%d:%.4f ", j+1, modelMatrix->features[i][j]);
 		}
-		fprintf(outputFileFp, "%.4f\n", modelMatrix->features[i][modelMatrix->p - 1]);
+		fprintf(outputFileFp, "%d:%.4f\n", modelMatrix->p, modelMatrix->features[i][modelMatrix->p - 1]);
 	}
 	
 	fclose(outputFileFp);
@@ -139,8 +141,6 @@ struct modelMatrix *extract(char *bamsFile, char *trainingFile,
 				&trainingRegions[i].chr, &trainingRegions[i].coordinate,
 				&trainingRegions[i].response);
 		
-		// printf("Current %dth training region is %d %d %d\n", i, trainingRegions[i].chr,trainingRegions[i].coordinate, trainingRegions[i].response);
-		
 		i++;
 	}
 	totalTrainingRegions = i;
@@ -166,7 +166,7 @@ struct modelMatrix *extract(char *bamsFile, char *trainingFile,
 	/* free pointers */
 	free(bams);
 
-	/* reaturen model matrix pointer */
+	/* return model matrix pointer */
 	return modelMatrix;
 }
 
