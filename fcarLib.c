@@ -22,7 +22,7 @@ static const uint32_t chrlen[] = { 249250621, 243199373, 198022430, 191154276, 1
 /*     extractFeature()       */
 /* extract feature from input */
 /*----------------------------*/
-int extractFeature(char *bamsFile, char *trainingFile, char *outputFile, char *paramFile) {
+int extractFeature(char *coveragesFile, char *trainingFile, char *outputFile, char *paramFile) {
 
 	/* initialize param */
 	struct extractFeatureParam *param = (struct extractFeatureParam *)calloc(1, sizeof(struct extractFeatureParam));
@@ -31,11 +31,8 @@ int extractFeature(char *bamsFile, char *trainingFile, char *outputFile, char *p
 	/* parse pars */
 	parseParam(paramFile, param);
 
-	/* calculate coverage */
-	coverage(bamsFile, param); // write to a tmp dir
-
 	/* extract feature */
-	modelMatrix = extract(bamsFile, trainingFile, param);
+	modelMatrix = extract(coveragesFile, trainingFile, param);
 
 	/* save feature */
 	saveModelMatrix(modelMatrix, param, outputFile);
@@ -90,35 +87,35 @@ int saveModelMatrix(struct modelMatrix *modelMatrix, struct extractFeatureParam 
 /*                extract                  */
 /* extract features around training region */
 /*-----------------------------------------*/
-struct modelMatrix *extract(char *bamsFile, char *trainingFile, 
+struct modelMatrix *extract(char *coveragesFile, char *trainingFile, 
 			struct extractFeatureParam *param){
 	
 	int i;
 
 	/* read in bams file names */
-	int totalBams;
-	FILE *bamsFileFp = NULL;
-	char **bams = (char **)calloc(MAX_BAM_FILES, sizeof(char *));
+	int totalCoverages;
+	FILE *coveragesFileFp = NULL;
+	char **coverages = (char **)calloc(MAX_BAM_FILES, sizeof(char *));
 	for (i = 0; i < MAX_BAM_FILES; i++) {
-		bams[i] = (char *)calloc(MAX_DIR_LEN, sizeof(char));
+		coverages[i] = (char *)calloc(MAX_DIR_LEN, sizeof(char));
 	}
 
-	if ((bamsFileFp = fopen(bamsFile, "r")) == NULL) {
-		printf("Error: cannot open file %s\n", bamsFile);
+	if ((coveragesFileFp = fopen(coveragesFile, "r")) == NULL) {
+		printf("Error: cannot open file %s\n", coveragesFile);
 		return EXIT_SUCCESS;
 	}
 
 	i = 0;
-	while (!feof(bamsFileFp)) {
+	while (!feof(coveragesFileFp)) {
 		if (i >= MAX_BAM_FILES) {
-			printf("Error: the number of input bam files exceeds the limit %d\n", i);
+			printf("Error: the number of input coverages files exceeds the limit %d\n", i);
 			return EXIT_SUCCESS;
 		}
-		fscanf(bamsFileFp, "%s\n", bams[i]);
+		fscanf(coveragesFileFp, "%s\n", coverages[i]);
 		i++;
 	}
-	totalBams = i;
-	fclose(bamsFileFp);
+	totalCoverages = i;
+	fclose(coveragesFileFp);
 
 	/* read in training regions */
 	int totalTrainingRegions;
@@ -150,21 +147,21 @@ struct modelMatrix *extract(char *bamsFile, char *trainingFile,
 	struct modelMatrix *modelMatrix = (struct modelMatrix *)calloc(1, sizeof(struct modelMatrix));
 	modelMatrix->n = totalTrainingRegions;
 	// note windowSize's unit is bp
-	modelMatrix->p = (param->windowSize / param->resolution) * totalBams; 
+	modelMatrix->p = (param->windowSize / param->resolution) * totalCoverages; 
 
 	float **features = (float **)calloc(modelMatrix->n, sizeof(float *));
 	for (i = 0; i < modelMatrix->n; i++) {
 		features[i] = (float *)calloc(modelMatrix->p, sizeof(float));
 	}
 	
-	extract_core(features, trainingRegions, totalTrainingRegions, bams, totalBams, param);
+	extract_core(features, trainingRegions, totalTrainingRegions, coverages, totalCoverages, param);
 
 	/* return model matrix */
 	modelMatrix->trainingRegions = trainingRegions;
 	modelMatrix->features = features;
 
 	/* free pointers */
-	free(bams);
+	free(coverages);
 
 	/* return model matrix pointer */
 	return modelMatrix;
@@ -175,7 +172,7 @@ struct modelMatrix *extract(char *bamsFile, char *trainingFile,
 /*     extract_core           */
 /*----------------------------*/
 int extract_core(float **features, struct trainingRegion *trainingRegions, 
-					int totalTrainingRegions, char **bams, int totalBams, 
+					int totalTrainingRegions, char **coverages, int totalCoverages, 
 					struct extractFeatureParam *param) {
 
 	int i, j, k;
@@ -207,24 +204,18 @@ int extract_core(float **features, struct trainingRegion *trainingRegions,
 		// now position is in the training region
 		position += (int)((float)trainingRegions[i].coordinate / (float)param->resolution + 0.5);
 		// now change position to begining of the windowSize around training region
-		position += - (int)((float)(param->windowSize / 2) / (float)param->resolution + 0.5);
+		position -= (int)((float)(param->windowSize / 2) / (float)param->resolution + 0.5);
 		
 		/* extract and write feature from each bam */
-		for (k = 0; k < totalBams; k++) {
+		for (k = 0; k < totalCoverages; k++) {
 
 			FILE *coverageFp = NULL;
-			char *coverageFileName = (char *)calloc(MAX_DIR_LEN, sizeof(char));
-			strcpy(coverageFileName, bams[k]);
-			strcat(coverageFileName, ".coverage");
-			char tmp[10];
-			sprintf(tmp, "%d", param->resolution);
-			strcat(coverageFileName, tmp);
 			
-			if ((coverageFp = fopen(coverageFileName, "rb")) == NULL) {
-				printf("Error: cannot open %s\n", coverageFileName);
+			if ((coverageFp = fopen(coverages[k], "rb")) == NULL) {
+				printf("Error: cannot open %s\n", coverages[k]);
+				printf("Info: run ./coverage -i bamfiles -p param\n");
 				exit(EXIT_FAILURE);
 			}
-			
 			
 			fseek(coverageFp, position*sizeof(float), SEEK_SET);
 			
@@ -232,7 +223,6 @@ int extract_core(float **features, struct trainingRegion *trainingRegions,
 			fread(&features[i][(param->windowSize / param->resolution)*k], sizeof(float), param->windowSize / param->resolution, coverageFp);
 			
 			fclose(coverageFp);
-			free(coverageFileName);
 		}
 	}
 
@@ -284,11 +274,14 @@ int parseParam(char *paramFile, struct extractFeatureParam *param){
 	return 0;
 }
 
-/*----------------------------*/
-/*          coverage          */
-/* count coverage for bams    */
-/*----------------------------*/
-int coverage(char *bamsFile, struct extractFeatureParam *param) {
+/*-------------------------------*/
+/*          coverage             */
+/* count coverage for bams       */
+/* Note: by convention, coverage */
+/* output filename is the bam file name */
+/* plus '.coverage%d', resolution */
+/*-------------------------------*/
+int coverage(char *bamsFile, char *paramFile) {
 
 	int i;
 	int totalBams;
@@ -298,6 +291,10 @@ int coverage(char *bamsFile, struct extractFeatureParam *param) {
 		bams[i] = (char *)calloc(MAX_DIR_LEN, sizeof(char));
 	}
 
+	/* parse param file */
+	struct extractFeatureParam *param = (struct extractFeatureParam *)calloc(1, sizeof(struct extractFeatureParam));
+	parseParam(paramFile, param);
+  
 	/* read in input bam file names */
 	if ((bamsFileFp = fopen(bamsFile, "r")) == NULL){
 		printf("Error: cannot open file %s\n", bamsFile);
@@ -318,7 +315,7 @@ int coverage(char *bamsFile, struct extractFeatureParam *param) {
 
 	/* count coverage for each bam */
 	for (i = 0; i < totalBams; i++) {
-
+    // note the outputfile name convention here
 		char *outputFileName = (char*)calloc(MAX_DIR_LEN, sizeof(char));
 		strcpy(outputFileName, bams[i]);
 		strcat(outputFileName, ".coverage");
@@ -326,13 +323,10 @@ int coverage(char *bamsFile, struct extractFeatureParam *param) {
 		sprintf(tmp, "%d", param->resolution);
 		strcat(outputFileName, tmp);
 
-		printf("Calculating coverage for: \n\t%s\n", bams[i]);
+		printf("Calculating coverage for: \n\t%s and saving to %s\n", bams[i], outputFileName);
 
-		/* added if coverage already exists, skip */
-		if( access( outputFileName, F_OK ) == -1 ) {
-			/* if coverage file does not exist */
-			coverage_core(bams[i], outputFileName, param);
-		}
+		/* count coverage */
+    coverage_core(bams[i], outputFileName, param);
 
 		free(outputFileName);
 	}
@@ -354,6 +348,7 @@ int coverage(char *bamsFile, struct extractFeatureParam *param) {
 /* 	This is necessary because when the resolution is high (10bp), */
 /* 	the old way will cause the signal to be not smooth and too sparse */
 /* 01-16-2015 @UPDATE: added pair-end coverage counting */
+/* @NOTE: float is 4 byte on jhpce01 */
 /*--------------------------------*/
 int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param) {
 
@@ -430,7 +425,7 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
 			  startBin = (int)((float)read->core.pos / (float)param->resolution + 0.5);
 			  endBin = (int)((float)(read->core.pos + read->core.l_qseq) / (float)param->resolution + 0.5);
       }
-      else {
+      else { // if pairend, assume ranked by ID
         if(is2ndMate == 1) {
           is2ndMate = 0; // assuming bam is sorted by id number
           continue;
@@ -447,9 +442,8 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
 
   			  startBin = (int)((float) left / (float)param->resolution + 0.5);
 	  		  endBin = (int)((float)(right + read->core.l_qseq) / (float)param->resolution + 0.5);
-           
+          is2ndMate = 1;
         }
-        is2ndMate = 1;
       }
 			int b;
 			// printf("startBin is %d and endBin is %d\n", startBin, endBin);

@@ -18,7 +18,7 @@ int menu_extractFeature(int argc, char **argv) {
 
 	/* ------------------------------- */
 	/*        extractFeature           */
-	/* -i bamsFile                     */
+	/* -i coveragesFile                */
 	/* -t traini region coordinate     */
 	/* -o outputFile                   */
 	/* -p paramFile                    */
@@ -27,7 +27,7 @@ int menu_extractFeature(int argc, char **argv) {
 	if (argc == 1) {
 		printf("/*-----------------------------------*/\n");
 		printf("/*            extractFeature         */\n");
-		printf("/* -i bams file list                 */\n");
+		printf("/* -i coverages file list            */\n");
 		printf("/* -t training region coordinate     */\n");
 		printf("/* -o output file                    */\n");
 		printf("/* -p parameter setting file         */\n");
@@ -35,7 +35,7 @@ int menu_extractFeature(int argc, char **argv) {
 		exit(EXIT_SUCCESS);
 	}
 
-	char *bamsFile = (char *)calloc(MAX_DIR_LEN, sizeof(char)); 
+	char *coveragesFile = (char *)calloc(MAX_DIR_LEN, sizeof(char)); 
 	char *trainingFile = (char *)calloc(MAX_DIR_LEN, sizeof(char)); 
 	char *outputFile = (char *)calloc(MAX_DIR_LEN, sizeof(char));
 	char *paramFile = (char *)calloc(MAX_DIR_LEN, sizeof(char));
@@ -46,7 +46,7 @@ int menu_extractFeature(int argc, char **argv) {
 	while (ni < argc) {
 		if (strcmp(argv[ni], "-i") == 0) {
 			ni++;
-			strcpy(bamsFile, argv[ni]);
+			strcpy(coveragesFile, argv[ni]);
 			iOK = 1;
 		}
 		else if (strcmp(argv[ni], "-t") == 0){
@@ -77,11 +77,11 @@ int menu_extractFeature(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 	else {
-		extractFeature(bamsFile, trainingFile, outputFile, paramFile);
+		extractFeature(coveragesFile, trainingFile, outputFile, paramFile);
 	}
 
 	/* free pointers */
-	free(bamsFile);
+	free(coveragesFile);
 	free(trainingFile);
 	free(outputFile);
 	free(paramFile);

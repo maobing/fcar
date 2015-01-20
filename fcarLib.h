@@ -42,7 +42,7 @@ struct modelMatrix {
 /*------------------------------*/
 /*        extractFeature        */
 /*------------------------------*/
-int extractFeature(char *bamsFile, char *trainingFile, char *outputFile, char *paramFile);
+int extractFeature(char *coveragesFile, char *trainingFile, char *outputFile, char *paramFile);
 
 /*------------------------------*/
 /*        parseParam            */
@@ -50,31 +50,28 @@ int extractFeature(char *bamsFile, char *trainingFile, char *outputFile, char *p
 int parseParam(char *paramFile, struct extractFeatureParam *param);
 
 /*------------------------------*/
-/*   extractFeature_core        */
-/*------------------------------*/
-int extractFeature_core(char *bamFileName, char *binCountFileName, 
-					int binSize, int stdSeqDepth, char *seqDepthFile);
-
-/*------------------------------*/
 /*            extract           */
 /*------------------------------*/
-struct modelMatrix *extract(char *bamsFile, char *trainingFile, struct extractFeatureParam *param);
+struct modelMatrix *extract(char *coveragesFile, char *trainingFile, struct extractFeatureParam *param);
 
 /*------------------------------*/
-/*       extract core           */
+/*    extractFeature core       */
+/*    lower level function      */
 /*------------------------------*/
 int extract_core(float **features, struct trainingRegion *trainingRegions, int totalTrainingRegions,
-	char **bams, int totalBams, struct extractFeatureParam *param);
+	char **coverages, int totalCoverages, struct extractFeatureParam *param);
 
-/*------------------------------*/
-/*      saveModelMatrix         */
-/*------------------------------*/
+/*--------------------------------*/
+/*      saveModelMatrix           */
+/* get feature from coverage file */
+/* as required input format       */
+/*--------------------------------*/
 int saveModelMatrix(struct modelMatrix *modelMatrix, struct extractFeatureParam *param, char *outputFile);
 
 /*------------------------------*/
 /*           coverage           */
 /*------------------------------*/
-int coverage(char *bamsFile, struct extractFeatureParam *param);
+int coverage(char *bamsFile, char *paramFile);
 
 /*------------------------------*/
 /*      coverage_core           */
