@@ -261,6 +261,15 @@ int parseParam(char *paramFile, struct extractFeatureParam *param){
       param->pairend = atoi(value);
       printf("/* %s is %s\n", name, value);
     }
+    // added min max length of fragment for pairend data
+    else if (strcmp(name, "min") == 0) {
+      param->min = atoi(value);
+      printf("/* %s is %s\n", name, value);
+    }
+    else if (strcmp(name, "max") == 0) {
+      param->max = atoi(value);
+      printf("/* %s is %s\n", name, value);
+    }
     else {
       printf("/* Warning: unkown parameters %s=%s, ignored\n", name, value);
     }
@@ -411,7 +420,6 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
   read = bam_init1();
 
   if(param->pairend == 0) {
-    int startBin, endBin;
     while (samread(bamFp, read) > 0) {
       if (read->core.tid < 0 || read->core.tid > 23) {
         continue;
@@ -419,6 +427,7 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
       /* @UPDATE on 09-09-2014 */
       /* increment signals at all covered bins */
       if (tidmap[read->core.tid] < NUM_SEQ) {
+        int startBin, endBin;
         startBin = (int)((float)read->core.pos / (float)param->resolution + 0.5);
         endBin = (int)((float)(read->core.pos + read->core.l_qseq + 14) / (float)param->resolution + 0.5); // added shift 14
 
@@ -437,7 +446,6 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
   if(param->pairend == 1) {
     // added for pair end coverage counting
     int is2ndMate = 0;
-    int startBin, endBin;
     while (samread(bamFp, read) > 0) {
       if (read->core.tid < 0 || read->core.tid > 23) {
         continue;
@@ -448,7 +456,8 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
         if(is2ndMate == 1) {
           is2ndMate = 0; // assuming bam is sorted by id number
           continue;
-        } else {
+        } 
+        else {
           uint32_t left, right;
           if(read->core.pos > read->core.mpos) {
             left = read->core.mpos;
@@ -458,15 +467,20 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
             left = read->core.pos;
             right = read->core.mpos;
           }
-
+          // filter out fragments with specified [min,max]
+          if(right - left + read->core.l_qseq < param->min || right - left + read->core.l_qseq > param->max) {
+            is2ndMate = 1;
+            continue;
+          }
+          int startBin, endBin;
           startBin = (int)((float) left / (float)param->resolution + 0.5);
           endBin = (int)((float)(right + read->core.l_qseq) / (float)param->resolution + 0.5);
           is2ndMate = 1;
-        }
-        int b;
-        // printf("startBin is %d and endBin is %d\n", startBin, endBin);
-        for(b = startBin; b <= endBin; b++) {
-          binCnt[tidmap[read->core.tid]][b]++;
+          int b;
+          // printf("startBin is %d and endBin is %d\n", startBin, endBin);
+          for(b = startBin; b <= endBin; b++) {
+            binCnt[tidmap[read->core.tid]][b]++;
+          }
         }
       }
       nread++;

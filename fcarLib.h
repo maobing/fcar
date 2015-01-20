@@ -22,6 +22,12 @@ struct extractFeatureParam {
 
 	/* bams are pairend */
 	int pairend;
+
+  /* min fragment length filter for pairend */
+  int min;
+  
+  /* max fragment length filter for pairend */
+  int max;
 };
 
 /* training region */

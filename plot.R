@@ -12,7 +12,7 @@ models = strsplit(x = args[2],split=",")[[1]]
 
 testFile = read.table(outputFile, stringsAsFactor = FALSE)
 for(i in 2:ncol(testFile)) {
-	testFile[,i] = unlist(strsplit(x = testFile[,i], split = ":"))[(1:(nrow(testFile)*2)) %% 2 == 0]
+	testFile[,i] = as.numeric(unlist(strsplit(x = testFile[,i], split = ":"))[(1:(nrow(testFile)*2)) %% 2 == 0])
 }
 
 # plot
