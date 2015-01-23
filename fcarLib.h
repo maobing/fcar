@@ -3,7 +3,7 @@
 /*-----------------------------*/
 #define MAX_DIR_LEN 255
 #define MAX_BAM_FILES 400
-#define MAX_TRAINING_REGIONS 10000
+#define MAX_TRAINING_REGIONS 1000000
 #define NUM_SEQ 23 // chrY & chrM excluded
 
 

@@ -7,6 +7,10 @@ model = 'LogisticRegressionL1,LogisticRegressionL2,RandomForest'
 for TF in TFs :
   trainTF = [TF]
   testTF = [ a for a in TFs if a != TF ]
+  
+  # MYC does not have Gm12878 narrowPeak
+  if 'CMYC' in trainTF :
+    continue
 
   # DNase+Histone
   k = 10 

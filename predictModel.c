@@ -116,10 +116,10 @@ int menu_predictModel(int argc, char **argv) {
 /* predictModel */
 int predictModel(char *method, char *trainedModel, char *trainFile, char *testFile, char *outputFile) {
 
-  char *cmd = (char *)calloc(MAX_DIR_LEN, sizeof(char));
+  char *cmd = (char *)calloc(1000, sizeof(char));
   
   // automatically determine num of features
-  char *tmpcmd = (char *)calloc(MAX_DIR_LEN, sizeof(char));
+  char *tmpcmd = (char *)calloc(1000, sizeof(char));
   FILE *tmpFp;
   
   int col;

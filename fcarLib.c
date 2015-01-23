@@ -131,13 +131,18 @@ struct modelMatrix *extract(char *coveragesFile, char *trainingFile,
     
     if (i >= MAX_TRAINING_REGIONS) {
       printf("Error: the number of training regions exceed the maximum allowed %d\n", MAX_TRAINING_REGIONS);
+      printf("i is %d\n", i);
       exit(EXIT_FAILURE);
     }
 
-    fscanf(trainingFileFp, "%d %d %d\n", // chr coordinate response
-        &trainingRegions[i].chr, &trainingRegions[i].coordinate,
-        &trainingRegions[i].response);
-    
+    if( (fscanf(trainingFileFp, "%d %d %d\n", &trainingRegions[i].chr, &trainingRegions[i].coordinate,&trainingRegions[i].response)) != 3) {
+      printf("error reading from %dth row from %s\n", i, trainingFile);
+      exit(EXIT_FAILURE);
+    }
+
+    // if(i % 1000 == 0) {
+      // printf("reading %d %d %d\n", trainingRegions[i].chr, trainingRegions[i].coordinate, trainingRegions[i].response);
+    // }
     i++;
   }
   totalTrainingRegions = i;
