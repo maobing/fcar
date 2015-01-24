@@ -11,6 +11,8 @@
 # @NOTE: only top 3 models are averaged
 # @NOTE: pass weights and control prediction
 #   to R too
+# @NOTE: R is too slow, only using it for plot
+#   add the other functions here
 #-----------------------------------------
 import shlex, subprocess, sys
 import os.path, re, time
@@ -247,7 +249,7 @@ def getVotingResults(result, weights, top) :
   if len(result) != len(weights) :
     print "len of result is not equal to len of weights"
     return -1
-  topWeights = sorted(weights)[:3]
+  topWeights = sorted(weights, reverse = True)[:3]
   for i in range(len(result[0])) :
     tmp = 0.0
     for j in range(len(weights)) :
@@ -299,7 +301,85 @@ def reserveControl(trainFile, m) :
   f_ctrl.close()
   return 0
 
-#---
+
+#----------------------------------
+# added new 
+# functions for ROC, estFDR, trueFDR
+#-----------------------------------
+def calcAUC(y,x) :
+  if len(x) != len(y):
+    print 'x y lens differ!'
+    return -1
+  y = [ b for (a,b) in sorted(zip(x,y)) ]
+  x = sorted(x)
+
+  area = 0.0
+  i = 1
+  # print 'x is', x[:8]
+  # print 'y is', y[:8]
+  # print 'len(x) is ', len(x)
+  while i < len(x):
+    # print 'current %d iter, area is %f' % (i,area)
+    area += 1.0/2.0*(y[i-1]+y[i])*(x[i]-x[i-1])
+    # if area > 1: 
+      # print 'area > 1'
+      # print 'x[i],x[i-1] is', x[i],x[i-1]
+      # print 'y[i],y[i-1] is ', y[i],y[i-1]
+    i += 1
+  return area
+
+def calcROC(Y, pred):
+  TPR = []
+  FPR = []
+  Y = [b for (a,b) in sorted(zip(pred, Y), reverse = True)]
+  for i in range(len(Y)) :
+    TPR.append( float(sum(Y[:i]))/float(sum(Y)) )
+    FPR.append( (float(i-sum(Y[:i]))) / float(len(Y) - sum(Y)) )
+  return(TPR,FPR)
+
+def calcFDR(Y,pred,ctrl):
+  sens = []
+  FDR = []
+  pvalue = [ calcPvalue(a, ctrl) for a in pred ]
+  # print 'pvalue is ', pvalue[:10]
+  pvalue = adjustFDR(pvalue)
+  # print 'adjusted pvalue is ', pvalue[:10]
+  Y = [ b for (a,b) in sorted(zip(pvalue,Y)) ]
+  pvalue = sorted(pvalue)
+  # print 'adjust p value largest is ', pvalue[-1]
+  for i in range(len(Y)) :
+    sens.append( float(sum(Y[:i]))/float(sum(Y)))
+  return(sens,pvalue)
+
+def calcPvalue(value, ctrl) :
+  return float(sum([ int(a >= value) for a in ctrl]))/float(len(ctrl))
+
+# @NOTE: if adjusted p value exceeds 1, should make it 1!
+def adjustFDR(pvalue):
+  pvalueSorted = sorted(pvalue)
+  return [ min(p*float(len(pvalue))/(pvalueSorted.index(p)+1.0), 1.0) for p in pvalue ]
+
+# ranked by predicted value in calcTrueFDR
+def calcTrueFDR(Y, pred):
+  sens = []
+  FDR = []
+  Y = [ b for (a,b) in sorted(zip(pred,Y), reverse = True) ]
+  pred = sorted(pred, reverse = True)
+  for i in range(len(Y)) :
+    sens.append(float(sum(Y[:i]))/float(sum(Y)))
+    if i == 0: 
+      FDR.append( 0.0 )
+    else: 
+      # make sure FDR is increasing
+      tmpFDR = float(i-sum(Y[:i])) / float(i)
+      if tmpFDR < FDR[-1] :
+        FDR.append(FDR[-1])
+      else :
+        FDR.append(tmpFDR)
+  
+  return(sens,FDR)
+
+
 # main
 # @NOTE: after adding inference
 #   this script implicitly assumes that
@@ -364,25 +444,109 @@ def main(argv) :
 
   model.append('voting')
 
-  ## overwrite outputfile name
   tmpmodel = list(set([ a.split('_')[0] for a in model]))
   outputFile = ''.join( ['../',os.path.basename(trainFile), \
       os.path.basename(testFile),','.join(tmpmodel), '_result'] )
 
   writeFormatted(testYs, testResult, outputFile)
   
-  ## output control too
+  ## write control result for inference
   outputFileControl = ''.join( ['../',os.path.basename(trainFile), \
       os.path.basename(testFile),','.join(tmpmodel), '_controlResult'] )
   
   writeFormatted(controlYs, controlResult, outputFileControl)
+
+  # calculate ROC
+  testROC = []
+  testAUC = []
+  print '--------------------------------------'
+  print '- calculating ROC'
+  for i in range(len(testResult)) :
+    (TPR, FPR) = calcROC(testYs, testResult[i])
+    testAUC.append(calcAUC(TPR,FPR))
+    print "- %s's auc is %f" % (model[i], testAUC[-1])
+    testROC.append(TPR)
+    testROC.append(FPR)
+
+  outputFileROC = ''.join( ['../',os.path.basename(trainFile), \
+      os.path.basename(testFile),','.join(tmpmodel), '_rocResult'] )
+
+  f = open(outputFileROC, 'w')
+
+  # print 'len(testROC) is %d' % len(testROC)
+  # print 'len(testROC[0]) is %d' % len(testROC[0])
+
+  for j in range(len(testROC[0])):
+    for i in range(len(testROC)):
+      if i == len(testROC) - 1:
+        f.write(repr(testROC[i][j])+'\n')
+      else:
+        f.write(repr(testROC[i][j])+' ')
+
+  f.close()
+
+  print '--------------------------------------'
+  print '- calculating est FDR'
+
+  # calculate est FDR
+  estFDR = []
+  estFDRAUC = []
+  for i in range(len(testResult)) :
+    (sens, FDR) = calcFDR(testYs, testResult[i], controlResult[i])
+    estFDRAUC.append(calcAUC(sens,FDR))
+    print "- %s's est FDR auc is %f" % (model[i], estFDRAUC[-1])
+    estFDR.append(sens)
+    estFDR.append(FDR)
+
+  outputFileEstFDR = ''.join( ['../',os.path.basename(trainFile), \
+      os.path.basename(testFile),','.join(tmpmodel), '_estFDRResult'] )
+
+  f = open(outputFileEstFDR, 'w')
+
+  for j in range(len(estFDR[0])):
+    for i in range(len(estFDR)):
+      if i == len(estFDR) - 1:
+        f.write(repr(estFDR[i][j])+'\n')
+      else:
+        f.write(repr(estFDR[i][j])+' ')
+
+  f.close()
+
+  # calculate true FDR
+  print '--------------------------------------'
+  print '- calculating true FDR'
+
+  trueFDR = []
+  trueFDRAUC = []
+  for i in range(len(testResult)) :
+    (sens, FDR) = calcTrueFDR(testYs, testResult[i])
+    trueFDRAUC.append(calcAUC(sens,FDR))
+    print "- %s's true FDR auc is %f" % (model[i], trueFDRAUC[-1])
+    trueFDR.append(sens)
+    trueFDR.append(FDR)
+
+  outputFileTrueFDR = ''.join( ['../',os.path.basename(trainFile), \
+      os.path.basename(testFile),','.join(tmpmodel), '_trueFDRResult'] )
+
+  f = open(outputFileTrueFDR, 'w')
+
+  for j in range(len(trueFDR[0])):
+    for i in range(len(trueFDR)):
+      if i == len(trueFDR) - 1:
+        f.write(repr(trueFDR[i][j])+'\n')
+      else:
+        f.write(repr(trueFDR[i][j])+' ')
+
+  f.close()
+
 
   # plot
   ## R script: plot 3 figures
   ## ROC, TPR~estFDR, TPR~trueFDR
   print '------------------------------------'
   print "- ploting "
-  cmd = 'Rscript plot.R %s %s %s %s %s' % (outputFile, outputFileControl, ','.join(model), ','.join([repr(weight) for weight in weights]), repr(top))
+  cmd = 'Rscript plot_v2.R %s %s %s %s %s' % (outputFileROC, outputFileEstFDR, \
+      outputFileTrueFDR, ','.join(model), repr(top))
   print '- cmd is %s' % cmd
   subprocess.call(shlex.split(cmd))
 
