@@ -26,5 +26,9 @@ COMMENT
 # DNaseFlash
 #----------------
 ## only CTCF has ChIPseq in cellline Ag09319
-./extractFeature -i ../coveragesFile_DNaseFlash  -t ../CTCFData_narrowPeak_Ag09319_genomewide.txt -o ../CTCFOutputFeature_Gm12878_genomewide.txt -p ../param_DNaseHistone
+./extractFeature -i ../coveragesFile_DNaseFlash  -t ../CTCFData_narrowPeak_Ag09319_genomewide.txt -o ../CTCFOutputFeature_Ag09319_genomewide.txt -p ../param_SRR801880
+
+python votingModel_inference.py -model LogisticRegressionL1,LogisticRegressionL2,RandomForest -train ../CMYCOutputFeature_2cat_SRR_filtered.txt_5_1000 -test ../CTCFOutputFeature_Ag09319_genomewide.txt_5_1000 -output default -k 2
+
+python votingModel_inference.py -model LogisticRegressionL1,LogisticRegressionL2,RandomForest -train ../GABPOutputFeature_2cat_SRR_filtered.txt_5_1000 -test ../CTCFOutputFeature_Ag09319_genomewide.txt_5_1000 -output default -k 2
 
