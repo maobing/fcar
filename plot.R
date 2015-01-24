@@ -61,7 +61,7 @@ aucs = numeric(length(models))
 cols = rainbow(ncol(testResult) - 1)
 png(file = paste0(outputFile, ".png"), type = "cairo", bg = "transparent",
 	width = 480*1.2*3, height = 480*1.2)
-
+par(mfrow = c(1,3))
 ## plot 1 ROC
 plot(NA, xlim=c(0,1),ylim=c(0,1), xlab = "FPR", ylab = "TPR", 
 	main = paste0(substr(args[1],1,23),"\n",substr(args[1],24,nchar(args[1]))))
