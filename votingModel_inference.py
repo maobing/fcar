@@ -250,11 +250,13 @@ def getVotingResults(result, weights, top) :
     print "len of result is not equal to len of weights"
     return -1
   topWeights = sorted(weights, reverse = True)[:3]
+  print 'topWeights is:', topWeights
   for i in range(len(result[0])) :
     tmp = 0.0
     for j in range(len(weights)) :
       if weights[j] in topWeights :
-        tmp += float(result[j][i])*weights[j]
+        # renomalize topWeights
+        tmp += float(result[j][i])*(weights[j]/sum(topWeights))
     votedResult.append(tmp)
 
   return votedResult
@@ -364,18 +366,14 @@ def calcTrueFDR(Y, pred):
   sens = []
   FDR = []
   Y = [ b for (a,b) in sorted(zip(pred,Y), reverse = True) ]
-  pred = sorted(pred, reverse = True)
   for i in range(len(Y)) :
     sens.append(float(sum(Y[:i]))/float(sum(Y)))
-    if i == 0: 
-      FDR.append( 0.0 )
-    else: 
-      # make sure FDR is increasing
-      tmpFDR = float(i-sum(Y[:i])) / float(i)
-      if tmpFDR < FDR[-1] :
-        FDR.append(FDR[-1])
-      else :
-        FDR.append(tmpFDR)
+    FDR.append( float(i-sum(Y[:i])) / float(i) )
+  # make sure true FDR is increasing
+  ##  need adjust from last FDR to first FDR
+  for i in reversed(range(1,len(Y)) :
+    if FDR[i] < FDR[i-1] :
+      FDR[i-1] = FDR[i]
   
   return(sens,FDR)
 
@@ -408,7 +406,7 @@ def main(argv) :
   addBenchmark(testFile, k)
 
   # add penalty for penalty-based method
-  cs = [0.0001, 0.001, 0.01, 0.1, 1]
+  cs = [0.001, 0.01, 0.1]
   addDiffPenalty(model, cs)
 
   # train model
