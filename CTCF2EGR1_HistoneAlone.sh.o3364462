@@ -1,0 +1,361 @@
+[1] "../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000LogisticRegressionL1,RandomForest,LogisticRegressionL2,Benchmark,voting_rocResult"    
+[2] "../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000LogisticRegressionL1,RandomForest,LogisticRegressionL2,Benchmark,voting_estFDRResult" 
+[3] "../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000LogisticRegressionL1,RandomForest,LogisticRegressionL2,Benchmark,voting_trueFDRResult"
+[4] "RandomForest,Benchmark,LogisticRegressionL1_0.001,LogisticRegressionL1_0.01,LogisticRegressionL1_0.1,LogisticRegressionL2_0.001,LogisticRegressionL2_0.01,LogisticRegressionL2_0.1,voting"         
+[5] "3"                                                                                                                                                                                                 
+null device 
+          1 
+-----------------------------------
+- adding benchmark  ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_Benchmark
+-----------------------------------
+- adding benchmark  ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control_Benchmark
+-----------------------------------
+- adding benchmark  ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000_Benchmark
+-----------------------------------
+- Models added for different values of c: LogisticRegressionL1_0.001,LogisticRegressionL1_0.01,LogisticRegressionL1_0.1,LogisticRegressionL2_0.001,LogisticRegressionL2_0.01,LogisticRegressionL2_0.1
+------------------------------------
+- training RandomForest using ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train
+- cmd is ./trainModel -m RandomForest -c 1 -t ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedRandomForest
+elapsed time: 28.40224099
+------------------------------------
+- training Benchmark using ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train
+- cmd is ./trainModel -m LogisticRegressionL1 -c 10000 -t ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_Benchmark -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedBenchmark
+#nonzeros/#features = 8/8
+elapsed time: 0.09972906
+------------------------------------
+- training LogisticRegressionL1_0.001 using ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train
+-- with c = 0.001
+- cmd is ./trainModel -m LogisticRegressionL1 -c 0.001 -t ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL1_0.001
+#nonzeros/#features = 18/1600
+elapsed time: 2.69100094
+------------------------------------
+- training LogisticRegressionL1_0.01 using ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train
+-- with c = 0.01
+- cmd is ./trainModel -m LogisticRegressionL1 -c 0.01 -t ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL1_0.01
+#nonzeros/#features = 302/1600
+elapsed time: 2.80196214
+------------------------------------
+- training LogisticRegressionL1_0.1 using ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train
+-- with c = 0.1
+- cmd is ./trainModel -m LogisticRegressionL1 -c 0.1 -t ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL1_0.1
+#nonzeros/#features = 681/1600
+elapsed time: 2.99480200
+------------------------------------
+- training LogisticRegressionL2_0.001 using ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train
+-- with c = 0.001
+- cmd is ./trainModel -m LogisticRegressionL2 -c 0.001 -t ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL2_0.001
+elapsed time: 2.78271699
+------------------------------------
+- training LogisticRegressionL2_0.01 using ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train
+-- with c = 0.01
+- cmd is ./trainModel -m LogisticRegressionL2 -c 0.01 -t ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL2_0.01
+elapsed time: 4.60252094
+------------------------------------
+- training LogisticRegressionL2_0.1 using ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train
+-- with c = 0.1
+- cmd is ./trainModel -m LogisticRegressionL2 -c 0.1 -t ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL2_0.1
+elapsed time: 14.28267598
+------------------------------------
+- predicting ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train using RandomForest
+- cmd is ./predictModel -m RandomForest -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedRandomForest -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_resultRandomForestByCTCF
+elapsed time: 29.69946694
+------------------------------------
+- predicting ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train using Benchmark
+- cmd is ./predictModel -m LogisticRegressionL1 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedBenchmark -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_Benchmark -test ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_Benchmark -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_resultBenchmarkByCTCF
+Accuracy = 95.1557% (6050/6358)
+elapsed time: 0.08082819
+------------------------------------
+- predicting ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train using LogisticRegressionL1_0.001
+- cmd is ./predictModel -m LogisticRegressionL1 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL1_0.001 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_resultLogisticRegressionL1_0.001ByCTCF
+Accuracy = 58.0214% (3689/6358)
+elapsed time: 1.84522605
+------------------------------------
+- predicting ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train using LogisticRegressionL1_0.01
+- cmd is ./predictModel -m LogisticRegressionL1 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL1_0.01 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_resultLogisticRegressionL1_0.01ByCTCF
+Accuracy = 93.2526% (5929/6358)
+elapsed time: 1.86594701
+------------------------------------
+- predicting ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train using LogisticRegressionL1_0.1
+- cmd is ./predictModel -m LogisticRegressionL1 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL1_0.1 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_resultLogisticRegressionL1_0.1ByCTCF
+Accuracy = 95.7219% (6086/6358)
+elapsed time: 1.81668806
+------------------------------------
+- predicting ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train using LogisticRegressionL2_0.001
+- cmd is ./predictModel -m LogisticRegressionL2 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL2_0.001 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_resultLogisticRegressionL2_0.001ByCTCF
+Accuracy = 95.9736% (6102/6358)
+elapsed time: 1.98824787
+------------------------------------
+- predicting ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train using LogisticRegressionL2_0.01
+- cmd is ./predictModel -m LogisticRegressionL2 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL2_0.01 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_resultLogisticRegressionL2_0.01ByCTCF
+Accuracy = 96.0994% (6110/6358)
+elapsed time: 1.81285501
+------------------------------------
+- predicting ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train using LogisticRegressionL2_0.1
+- cmd is ./predictModel -m LogisticRegressionL2 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL2_0.1 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_resultLogisticRegressionL2_0.1ByCTCF
+Accuracy = 97.3734% (6191/6358)
+elapsed time: 1.83409381
+------------------------------------
+- predicting ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control using RandomForest
+- cmd is ./predictModel -m RandomForest -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedRandomForest -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control_resultRandomForestByCTCF
+elapsed time: 24.57860899
+------------------------------------
+- predicting ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control using Benchmark
+- cmd is ./predictModel -m LogisticRegressionL1 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedBenchmark -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_Benchmark -test ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control_Benchmark -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control_resultBenchmarkByCTCF
+Accuracy = 94.8104% (475/501)
+elapsed time: 0.17551994
+------------------------------------
+- predicting ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control using LogisticRegressionL1_0.001
+- cmd is ./predictModel -m LogisticRegressionL1 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL1_0.001 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control_resultLogisticRegressionL1_0.001ByCTCF
+Accuracy = 39.3214% (197/501)
+elapsed time: 0.15278506
+------------------------------------
+- predicting ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control using LogisticRegressionL1_0.01
+- cmd is ./predictModel -m LogisticRegressionL1 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL1_0.01 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control_resultLogisticRegressionL1_0.01ByCTCF
+Accuracy = 90.8184% (455/501)
+elapsed time: 0.15189910
+------------------------------------
+- predicting ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control using LogisticRegressionL1_0.1
+- cmd is ./predictModel -m LogisticRegressionL1 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL1_0.1 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control_resultLogisticRegressionL1_0.1ByCTCF
+Accuracy = 94.4112% (473/501)
+elapsed time: 0.15387321
+------------------------------------
+- predicting ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control using LogisticRegressionL2_0.001
+- cmd is ./predictModel -m LogisticRegressionL2 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL2_0.001 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control_resultLogisticRegressionL2_0.001ByCTCF
+Accuracy = 95.2096% (477/501)
+elapsed time: 0.15328884
+------------------------------------
+- predicting ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control using LogisticRegressionL2_0.01
+- cmd is ./predictModel -m LogisticRegressionL2 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL2_0.01 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control_resultLogisticRegressionL2_0.01ByCTCF
+Accuracy = 93.8124% (470/501)
+elapsed time: 0.15270519
+------------------------------------
+- predicting ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control using LogisticRegressionL2_0.1
+- cmd is ./predictModel -m LogisticRegressionL2 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL2_0.1 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control -o ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control_resultLogisticRegressionL2_0.1ByCTCF
+Accuracy = 92.6148% (464/501)
+elapsed time: 0.15196419
+------------------------------------
+- predicting ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000 using RandomForest
+- cmd is ./predictModel -m RandomForest -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedRandomForest -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000 -o ./../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000_resultRandomForestByCTCF
+elapsed time: 76.82425308
+------------------------------------
+- predicting ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000 using Benchmark
+- cmd is ./predictModel -m LogisticRegressionL1 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedBenchmark -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_Benchmark -test ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000_Benchmark -o ./../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000_resultBenchmarkByCTCF
+Accuracy = 82.4483% (55895/67794)
+elapsed time: 0.32456589
+------------------------------------
+- predicting ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000 using LogisticRegressionL1_0.001
+- cmd is ./predictModel -m LogisticRegressionL1 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL1_0.001 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000 -o ./../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000_resultLogisticRegressionL1_0.001ByCTCF
+Accuracy = 40.4136% (27398/67794)
+elapsed time: 22.36902308
+------------------------------------
+- predicting ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000 using LogisticRegressionL1_0.01
+- cmd is ./predictModel -m LogisticRegressionL1 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL1_0.01 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000 -o ./../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000_resultLogisticRegressionL1_0.01ByCTCF
+Accuracy = 80.9762% (54897/67794)
+elapsed time: 18.96640396
+------------------------------------
+- predicting ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000 using LogisticRegressionL1_0.1
+- cmd is ./predictModel -m LogisticRegressionL1 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL1_0.1 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000 -o ./../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000_resultLogisticRegressionL1_0.1ByCTCF
+Accuracy = 82.0633% (55634/67794)
+elapsed time: 19.00195193
+------------------------------------
+- predicting ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000 using LogisticRegressionL2_0.001
+- cmd is ./predictModel -m LogisticRegressionL2 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL2_0.001 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000 -o ./../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000_resultLogisticRegressionL2_0.001ByCTCF
+Accuracy = 83.2389% (56431/67794)
+elapsed time: 20.00709605
+------------------------------------
+- predicting ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000 using LogisticRegressionL2_0.01
+- cmd is ./predictModel -m LogisticRegressionL2 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL2_0.01 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000 -o ./../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000_resultLogisticRegressionL2_0.01ByCTCF
+Accuracy = 82.0545% (55628/67794)
+elapsed time: 22.50292611
+------------------------------------
+- predicting ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000 using LogisticRegressionL2_0.1
+- cmd is ./predictModel -m LogisticRegressionL2 -tm ./../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train_trainedLogisticRegressionL2_0.1 -train ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train -test ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000 -o ./../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000_resultLogisticRegressionL2_0.1ByCTCF
+Accuracy = 81.5529% (55288/67794)
+elapsed time: 19.32538700
+------------------------------------
+- collecting results for ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_train 
+- time elapsed  4.97176814079
+------------------------------------
+- collecting results for ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000_control 
+- time elapsed  0.634067058563
+------------------------------------
+- collecting results for ../EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000 
+- elapsed time is  53.1293010712
+------------------------------------
+- calculating voting weights
+weights: [0.8237473452194161, 0.025076055930483017, 0.005819427252707041, 0.011074113591474151, 0.028558882579225512, 0.02159997527044565, 0.031729535695264585, 0.05239466446098375]
+------------------------------------
+- conducting model voting
+topWeights is: [0.8237473452194161, 0.05239466446098375, 0.031729535695264585]
+------------------------------------
+- conducting model voting
+topWeights is: [0.8237473452194161, 0.05239466446098375, 0.031729535695264585]
+------------------------------------
+- writing to  ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000LogisticRegressionL1,RandomForest,LogisticRegressionL2,Benchmark,voting_result
+------------------------------------
+- writing to  ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000LogisticRegressionL1,RandomForest,LogisticRegressionL2,Benchmark,voting_controlResult
+--------------------------------------
+- calculating ROC
+--------------------------------
+- calcROC
+--------------------------------
+- calcAUC
+- RandomForest's auc is 0.921824
+--------------------------------
+- calcROC
+--------------------------------
+- calcAUC
+- Benchmark's auc is 0.829662
+--------------------------------
+- calcROC
+--------------------------------
+- calcAUC
+- LogisticRegressionL1_0.001's auc is 0.890213
+--------------------------------
+- calcROC
+--------------------------------
+- calcAUC
+- LogisticRegressionL1_0.01's auc is 0.785609
+--------------------------------
+- calcROC
+--------------------------------
+- calcAUC
+- LogisticRegressionL1_0.1's auc is 0.819810
+--------------------------------
+- calcROC
+--------------------------------
+- calcAUC
+- LogisticRegressionL2_0.001's auc is 0.823013
+--------------------------------
+- calcROC
+--------------------------------
+- calcAUC
+- LogisticRegressionL2_0.01's auc is 0.823477
+--------------------------------
+- calcROC
+--------------------------------
+- calcAUC
+- LogisticRegressionL2_0.1's auc is 0.811716
+--------------------------------
+- calcROC
+--------------------------------
+- calcAUC
+- voting's auc is 0.918700
+elapsed time is  897.894629955
+--------------------------------------
+- calculating est FDR
+--------------------------------
+- calcFDR
+--------------------------------
+- adjustFDR
+--------------------------------
+- calcAUC
+- RandomForest's est FDR auc is 0.922830
+--------------------------------
+- calcFDR
+--------------------------------
+- adjustFDR
+--------------------------------
+- calcAUC
+- Benchmark's est FDR auc is 0.812698
+--------------------------------
+- calcFDR
+--------------------------------
+- adjustFDR
+--------------------------------
+- calcAUC
+- LogisticRegressionL1_0.001's est FDR auc is 0.779333
+--------------------------------
+- calcFDR
+--------------------------------
+- adjustFDR
+--------------------------------
+- calcAUC
+- LogisticRegressionL1_0.01's est FDR auc is 0.763941
+--------------------------------
+- calcFDR
+--------------------------------
+- adjustFDR
+--------------------------------
+- calcAUC
+- LogisticRegressionL1_0.1's est FDR auc is 0.794460
+--------------------------------
+- calcFDR
+--------------------------------
+- adjustFDR
+--------------------------------
+- calcAUC
+- LogisticRegressionL2_0.001's est FDR auc is 0.808454
+--------------------------------
+- calcFDR
+--------------------------------
+- adjustFDR
+--------------------------------
+- calcAUC
+- LogisticRegressionL2_0.01's est FDR auc is 0.797270
+--------------------------------
+- calcFDR
+--------------------------------
+- adjustFDR
+--------------------------------
+- calcAUC
+- LogisticRegressionL2_0.1's est FDR auc is 0.264494
+--------------------------------
+- calcFDR
+--------------------------------
+- adjustFDR
+--------------------------------
+- calcAUC
+- voting's est FDR auc is 0.931003
+elapsed time is  702.069301128
+--------------------------------------
+- calculating true FDR
+--------------------------------
+- calcTrueFDR
+--------------------------------
+- calcAUC
+- RandomForest's true FDR auc is 0.364372
+--------------------------------
+- calcTrueFDR
+--------------------------------
+- calcAUC
+- Benchmark's true FDR auc is 0.316327
+--------------------------------
+- calcTrueFDR
+--------------------------------
+- calcAUC
+- LogisticRegressionL1_0.001's true FDR auc is 0.305245
+--------------------------------
+- calcTrueFDR
+--------------------------------
+- calcAUC
+- LogisticRegressionL1_0.01's true FDR auc is 0.276540
+--------------------------------
+- calcTrueFDR
+--------------------------------
+- calcAUC
+- LogisticRegressionL1_0.1's true FDR auc is 0.293791
+--------------------------------
+- calcTrueFDR
+--------------------------------
+- calcAUC
+- LogisticRegressionL2_0.001's true FDR auc is 0.288284
+--------------------------------
+- calcTrueFDR
+--------------------------------
+- calcAUC
+- LogisticRegressionL2_0.01's true FDR auc is 0.314038
+--------------------------------
+- calcTrueFDR
+--------------------------------
+- calcAUC
+- LogisticRegressionL2_0.1's true FDR auc is 0.354404
+--------------------------------
+- calcTrueFDR
+--------------------------------
+- calcAUC
+- voting's true FDR auc is 0.337311
+- elapsed time is  899.447863102
+------------------------------------
+- ploting 
+- cmd is Rscript plot_v2.R ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000LogisticRegressionL1,RandomForest,LogisticRegressionL2,Benchmark,voting_rocResult ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000LogisticRegressionL1,RandomForest,LogisticRegressionL2,Benchmark,voting_estFDRResult ../CTCFOutputFeature_2cat_HistoneAlone.txt_5_1000EGR1OutputFeature_Gm12878_genomewide_HistoneAlone.txt_5_1000LogisticRegressionL1,RandomForest,LogisticRegressionL2,Benchmark,voting_trueFDRResult RandomForest,Benchmark,LogisticRegressionL1_0.001,LogisticRegressionL1_0.01,LogisticRegressionL1_0.1,LogisticRegressionL2_0.001,LogisticRegressionL2_0.01,LogisticRegressionL2_0.1,voting 3

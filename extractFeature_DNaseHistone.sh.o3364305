@@ -1,0 +1,599 @@
+
+
+/*------------------------------------*/
+/* resolution is 5
+/* windowSize is 1000
+/* pairend is 0
+/* min is 0
+/* max is 10000
+/*------------------------------------*/
+
+
+Extracting features for training regions:
+	Processing 1000th training region
+	Processing 2000th training region
+	Processing 3000th training region
+	Processing 4000th training region
+	Processing 5000th training region
+
+Writing features to output
+
+
+
+/*------------------------------------*/
+/* resolution is 5
+/* windowSize is 1000
+/* pairend is 0
+/* min is 0
+/* max is 10000
+/*------------------------------------*/
+
+
+Extracting features for training regions:
+	Processing 1000th training region
+	Processing 2000th training region
+	Processing 3000th training region
+	Processing 4000th training region
+	Processing 5000th training region
+	Processing 6000th training region
+
+Writing features to output
+
+
+
+/*------------------------------------*/
+/* resolution is 5
+/* windowSize is 1000
+/* pairend is 0
+/* min is 0
+/* max is 10000
+/*------------------------------------*/
+
+
+Extracting features for training regions:
+	Processing 1000th training region
+	Processing 2000th training region
+	Processing 3000th training region
+	Processing 4000th training region
+	Processing 5000th training region
+	Processing 6000th training region
+	Processing 7000th training region
+	Processing 8000th training region
+	Processing 9000th training region
+	Processing 10000th training region
+	Processing 11000th training region
+	Processing 12000th training region
+	Processing 13000th training region
+	Processing 14000th training region
+	Processing 15000th training region
+	Processing 16000th training region
+	Processing 17000th training region
+	Processing 18000th training region
+	Processing 19000th training region
+	Processing 20000th training region
+	Processing 21000th training region
+	Processing 22000th training region
+	Processing 23000th training region
+	Processing 24000th training region
+	Processing 25000th training region
+	Processing 26000th training region
+	Processing 27000th training region
+	Processing 28000th training region
+	Processing 29000th training region
+	Processing 30000th training region
+	Processing 31000th training region
+	Processing 32000th training region
+	Processing 33000th training region
+	Processing 34000th training region
+	Processing 35000th training region
+	Processing 36000th training region
+	Processing 37000th training region
+	Processing 38000th training region
+	Processing 39000th training region
+	Processing 40000th training region
+	Processing 41000th training region
+	Processing 42000th training region
+	Processing 43000th training region
+	Processing 44000th training region
+	Processing 45000th training region
+	Processing 46000th training region
+	Processing 47000th training region
+	Processing 48000th training region
+	Processing 49000th training region
+	Processing 50000th training region
+	Processing 51000th training region
+	Processing 52000th training region
+	Processing 53000th training region
+	Processing 54000th training region
+	Processing 55000th training region
+	Processing 56000th training region
+	Processing 57000th training region
+	Processing 58000th training region
+	Processing 59000th training region
+	Processing 60000th training region
+	Processing 61000th training region
+	Processing 62000th training region
+	Processing 63000th training region
+	Processing 64000th training region
+	Processing 65000th training region
+	Processing 66000th training region
+	Processing 67000th training region
+	Processing 68000th training region
+	Processing 69000th training region
+	Processing 70000th training region
+	Processing 71000th training region
+	Processing 72000th training region
+	Processing 73000th training region
+	Processing 74000th training region
+	Processing 75000th training region
+	Processing 76000th training region
+	Processing 77000th training region
+	Processing 78000th training region
+	Processing 79000th training region
+	Processing 80000th training region
+	Processing 81000th training region
+	Processing 82000th training region
+	Processing 83000th training region
+	Processing 84000th training region
+	Processing 85000th training region
+	Processing 86000th training region
+	Processing 87000th training region
+	Processing 88000th training region
+	Processing 89000th training region
+	Processing 90000th training region
+	Processing 91000th training region
+	Processing 92000th training region
+	Processing 93000th training region
+	Processing 94000th training region
+	Processing 95000th training region
+	Processing 96000th training region
+	Processing 97000th training region
+	Processing 98000th training region
+	Processing 99000th training region
+	Processing 100000th training region
+	Processing 101000th training region
+	Processing 102000th training region
+	Processing 103000th training region
+	Processing 104000th training region
+	Processing 105000th training region
+	Processing 106000th training region
+	Processing 107000th training region
+	Processing 108000th training region
+	Processing 109000th training region
+	Processing 110000th training region
+	Processing 111000th training region
+	Processing 112000th training region
+	Processing 113000th training region
+	Processing 114000th training region
+	Processing 115000th training region
+	Processing 116000th training region
+	Processing 117000th training region
+	Processing 118000th training region
+	Processing 119000th training region
+	Processing 120000th training region
+	Processing 121000th training region
+	Processing 122000th training region
+	Processing 123000th training region
+	Processing 124000th training region
+	Processing 125000th training region
+	Processing 126000th training region
+	Processing 127000th training region
+	Processing 128000th training region
+	Processing 129000th training region
+	Processing 130000th training region
+	Processing 131000th training region
+	Processing 132000th training region
+	Processing 133000th training region
+	Processing 134000th training region
+	Processing 135000th training region
+	Processing 136000th training region
+	Processing 137000th training region
+	Processing 138000th training region
+	Processing 139000th training region
+	Processing 140000th training region
+	Processing 141000th training region
+	Processing 142000th training region
+	Processing 143000th training region
+	Processing 144000th training region
+	Processing 145000th training region
+	Processing 146000th training region
+	Processing 147000th training region
+	Processing 148000th training region
+	Processing 149000th training region
+	Processing 150000th training region
+	Processing 151000th training region
+	Processing 152000th training region
+	Processing 153000th training region
+	Processing 154000th training region
+	Processing 155000th training region
+	Processing 156000th training region
+	Processing 157000th training region
+	Processing 158000th training region
+	Processing 159000th training region
+	Processing 160000th training region
+	Processing 161000th training region
+	Processing 162000th training region
+	Processing 163000th training region
+	Processing 164000th training region
+	Processing 165000th training region
+	Processing 166000th training region
+	Processing 167000th training region
+	Processing 168000th training region
+	Processing 169000th training region
+
+Writing features to output
+
+
+
+/*------------------------------------*/
+/* resolution is 5
+/* windowSize is 1000
+/* pairend is 0
+/* min is 0
+/* max is 10000
+/*------------------------------------*/
+
+
+Extracting features for training regions:
+	Processing 1000th training region
+	Processing 2000th training region
+	Processing 3000th training region
+	Processing 4000th training region
+	Processing 5000th training region
+	Processing 6000th training region
+	Processing 7000th training region
+	Processing 8000th training region
+	Processing 9000th training region
+	Processing 10000th training region
+	Processing 11000th training region
+	Processing 12000th training region
+	Processing 13000th training region
+	Processing 14000th training region
+	Processing 15000th training region
+	Processing 16000th training region
+	Processing 17000th training region
+	Processing 18000th training region
+	Processing 19000th training region
+	Processing 20000th training region
+	Processing 21000th training region
+	Processing 22000th training region
+	Processing 23000th training region
+	Processing 24000th training region
+	Processing 25000th training region
+	Processing 26000th training region
+	Processing 27000th training region
+	Processing 28000th training region
+	Processing 29000th training region
+	Processing 30000th training region
+	Processing 31000th training region
+	Processing 32000th training region
+	Processing 33000th training region
+	Processing 34000th training region
+	Processing 35000th training region
+	Processing 36000th training region
+	Processing 37000th training region
+	Processing 38000th training region
+	Processing 39000th training region
+	Processing 40000th training region
+	Processing 41000th training region
+	Processing 42000th training region
+	Processing 43000th training region
+	Processing 44000th training region
+	Processing 45000th training region
+	Processing 46000th training region
+	Processing 47000th training region
+	Processing 48000th training region
+	Processing 49000th training region
+	Processing 50000th training region
+	Processing 51000th training region
+	Processing 52000th training region
+	Processing 53000th training region
+	Processing 54000th training region
+	Processing 55000th training region
+	Processing 56000th training region
+	Processing 57000th training region
+	Processing 58000th training region
+	Processing 59000th training region
+	Processing 60000th training region
+	Processing 61000th training region
+	Processing 62000th training region
+	Processing 63000th training region
+	Processing 64000th training region
+	Processing 65000th training region
+	Processing 66000th training region
+	Processing 67000th training region
+	Processing 68000th training region
+	Processing 69000th training region
+	Processing 70000th training region
+	Processing 71000th training region
+	Processing 72000th training region
+	Processing 73000th training region
+	Processing 74000th training region
+	Processing 75000th training region
+	Processing 76000th training region
+	Processing 77000th training region
+	Processing 78000th training region
+	Processing 79000th training region
+	Processing 80000th training region
+	Processing 81000th training region
+	Processing 82000th training region
+	Processing 83000th training region
+	Processing 84000th training region
+	Processing 85000th training region
+	Processing 86000th training region
+	Processing 87000th training region
+	Processing 88000th training region
+	Processing 89000th training region
+	Processing 90000th training region
+	Processing 91000th training region
+	Processing 92000th training region
+	Processing 93000th training region
+	Processing 94000th training region
+	Processing 95000th training region
+	Processing 96000th training region
+	Processing 97000th training region
+	Processing 98000th training region
+	Processing 99000th training region
+	Processing 100000th training region
+	Processing 101000th training region
+	Processing 102000th training region
+	Processing 103000th training region
+	Processing 104000th training region
+	Processing 105000th training region
+	Processing 106000th training region
+	Processing 107000th training region
+	Processing 108000th training region
+	Processing 109000th training region
+	Processing 110000th training region
+	Processing 111000th training region
+	Processing 112000th training region
+	Processing 113000th training region
+	Processing 114000th training region
+	Processing 115000th training region
+	Processing 116000th training region
+	Processing 117000th training region
+	Processing 118000th training region
+	Processing 119000th training region
+	Processing 120000th training region
+	Processing 121000th training region
+	Processing 122000th training region
+	Processing 123000th training region
+	Processing 124000th training region
+	Processing 125000th training region
+	Processing 126000th training region
+	Processing 127000th training region
+	Processing 128000th training region
+	Processing 129000th training region
+	Processing 130000th training region
+	Processing 131000th training region
+	Processing 132000th training region
+	Processing 133000th training region
+	Processing 134000th training region
+	Processing 135000th training region
+	Processing 136000th training region
+	Processing 137000th training region
+	Processing 138000th training region
+	Processing 139000th training region
+	Processing 140000th training region
+	Processing 141000th training region
+	Processing 142000th training region
+	Processing 143000th training region
+	Processing 144000th training region
+	Processing 145000th training region
+	Processing 146000th training region
+	Processing 147000th training region
+	Processing 148000th training region
+	Processing 149000th training region
+	Processing 150000th training region
+	Processing 151000th training region
+	Processing 152000th training region
+	Processing 153000th training region
+	Processing 154000th training region
+	Processing 155000th training region
+	Processing 156000th training region
+	Processing 157000th training region
+	Processing 158000th training region
+	Processing 159000th training region
+	Processing 160000th training region
+	Processing 161000th training region
+	Processing 162000th training region
+	Processing 163000th training region
+	Processing 164000th training region
+	Processing 165000th training region
+	Processing 166000th training region
+	Processing 167000th training region
+	Processing 168000th training region
+	Processing 169000th training region
+	Processing 170000th training region
+	Processing 171000th training region
+	Processing 172000th training region
+	Processing 173000th training region
+	Processing 174000th training region
+	Processing 175000th training region
+	Processing 176000th training region
+	Processing 177000th training region
+	Processing 178000th training region
+	Processing 179000th training region
+	Processing 180000th training region
+	Processing 181000th training region
+	Processing 182000th training region
+	Processing 183000th training region
+	Processing 184000th training region
+	Processing 185000th training region
+	Processing 186000th training region
+	Processing 187000th training region
+	Processing 188000th training region
+	Processing 189000th training region
+	Processing 190000th training region
+	Processing 191000th training region
+	Processing 192000th training region
+	Processing 193000th training region
+	Processing 194000th training region
+	Processing 195000th training region
+	Processing 196000th training region
+	Processing 197000th training region
+	Processing 198000th training region
+	Processing 199000th training region
+	Processing 200000th training region
+	Processing 201000th training region
+	Processing 202000th training region
+	Processing 203000th training region
+	Processing 204000th training region
+	Processing 205000th training region
+	Processing 206000th training region
+	Processing 207000th training region
+	Processing 208000th training region
+	Processing 209000th training region
+	Processing 210000th training region
+	Processing 211000th training region
+	Processing 212000th training region
+	Processing 213000th training region
+	Processing 214000th training region
+	Processing 215000th training region
+	Processing 216000th training region
+	Processing 217000th training region
+	Processing 218000th training region
+	Processing 219000th training region
+	Processing 220000th training region
+	Processing 221000th training region
+	Processing 222000th training region
+	Processing 223000th training region
+	Processing 224000th training region
+	Processing 225000th training region
+	Processing 226000th training region
+	Processing 227000th training region
+	Processing 228000th training region
+	Processing 229000th training region
+	Processing 230000th training region
+	Processing 231000th training region
+	Processing 232000th training region
+	Processing 233000th training region
+	Processing 234000th training region
+	Processing 235000th training region
+	Processing 236000th training region
+	Processing 237000th training region
+	Processing 238000th training region
+	Processing 239000th training region
+	Processing 240000th training region
+	Processing 241000th training region
+	Processing 242000th training region
+	Processing 243000th training region
+	Processing 244000th training region
+	Processing 245000th training region
+	Processing 246000th training region
+	Processing 247000th training region
+	Processing 248000th training region
+	Processing 249000th training region
+	Processing 250000th training region
+	Processing 251000th training region
+	Processing 252000th training region
+	Processing 253000th training region
+	Processing 254000th training region
+	Processing 255000th training region
+	Processing 256000th training region
+	Processing 257000th training region
+	Processing 258000th training region
+	Processing 259000th training region
+	Processing 260000th training region
+	Processing 261000th training region
+	Processing 262000th training region
+	Processing 263000th training region
+	Processing 264000th training region
+	Processing 265000th training region
+	Processing 266000th training region
+	Processing 267000th training region
+	Processing 268000th training region
+	Processing 269000th training region
+	Processing 270000th training region
+	Processing 271000th training region
+	Processing 272000th training region
+	Processing 273000th training region
+	Processing 274000th training region
+	Processing 275000th training region
+	Processing 276000th training region
+	Processing 277000th training region
+
+Writing features to output
+
+
+
+/*------------------------------------*/
+/* resolution is 5
+/* windowSize is 1000
+/* pairend is 0
+/* min is 0
+/* max is 10000
+/*------------------------------------*/
+
+
+Extracting features for training regions:
+	Processing 1000th training region
+	Processing 2000th training region
+	Processing 3000th training region
+	Processing 4000th training region
+	Processing 5000th training region
+	Processing 6000th training region
+	Processing 7000th training region
+	Processing 8000th training region
+	Processing 9000th training region
+	Processing 10000th training region
+	Processing 11000th training region
+	Processing 12000th training region
+	Processing 13000th training region
+	Processing 14000th training region
+	Processing 15000th training region
+	Processing 16000th training region
+	Processing 17000th training region
+	Processing 18000th training region
+	Processing 19000th training region
+	Processing 20000th training region
+	Processing 21000th training region
+	Processing 22000th training region
+	Processing 23000th training region
+	Processing 24000th training region
+	Processing 25000th training region
+	Processing 26000th training region
+	Processing 27000th training region
+	Processing 28000th training region
+	Processing 29000th training region
+	Processing 30000th training region
+	Processing 31000th training region
+	Processing 32000th training region
+	Processing 33000th training region
+	Processing 34000th training region
+	Processing 35000th training region
+	Processing 36000th training region
+	Processing 37000th training region
+	Processing 38000th training region
+	Processing 39000th training region
+	Processing 40000th training region
+	Processing 41000th training region
+	Processing 42000th training region
+	Processing 43000th training region
+	Processing 44000th training region
+	Processing 45000th training region
+	Processing 46000th training region
+	Processing 47000th training region
+	Processing 48000th training region
+	Processing 49000th training region
+	Processing 50000th training region
+	Processing 51000th training region
+	Processing 52000th training region
+	Processing 53000th training region
+	Processing 54000th training region
+	Processing 55000th training region
+	Processing 56000th training region
+	Processing 57000th training region
+	Processing 58000th training region
+	Processing 59000th training region
+	Processing 60000th training region
+	Processing 61000th training region
+	Processing 62000th training region
+	Processing 63000th training region
+	Processing 64000th training region
+	Processing 65000th training region
+	Processing 66000th training region
+	Processing 67000th training region
+
+Writing features to output
+
