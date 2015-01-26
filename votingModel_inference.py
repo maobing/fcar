@@ -309,6 +309,8 @@ def reserveControl(trainFile, m) :
 # functions for ROC, estFDR, trueFDR
 #-----------------------------------
 def calcAUC(y,x) :
+  print '--------------------------------'
+  print '- calcAUC'
   if len(x) != len(y):
     print 'x y lens differ!'
     return -1
@@ -317,61 +319,121 @@ def calcAUC(y,x) :
 
   area = 0.0
   i = 1
-  # print 'x is', x[:8]
-  # print 'y is', y[:8]
-  # print 'len(x) is ', len(x)
   while i < len(x):
-    # print 'current %d iter, area is %f' % (i,area)
     area += 1.0/2.0*(y[i-1]+y[i])*(x[i]-x[i-1])
-    # if area > 1: 
-      # print 'area > 1'
-      # print 'x[i],x[i-1] is', x[i],x[i-1]
-      # print 'y[i],y[i-1] is ', y[i],y[i-1]
     i += 1
   return area
 
 def calcROC(Y, pred):
+  print '--------------------------------'
+  print '- calcROC'
+  if len(Y) != len(pred) :
+    print 'Y pred lens differ!'
+    return -1
+
   TPR = []
   FPR = []
-  Y = [b for (a,b) in sorted(zip(pred, Y), reverse = True)]
-  for i in range(len(Y)) :
-    TPR.append( float(sum(Y[:i]))/float(sum(Y)) )
-    FPR.append( (float(i-sum(Y[:i]))) / float(len(Y) - sum(Y)) )
+
+  # use only unqiue values by get set()
+  uniquePred = sorted(list(set(pred)), reverse = True)
+  # print '- calcROC: # of unique pred is ', len(uniquePred) 
+  # print 'uniquePred is ', uniquePred[:10]
+
+  allP = sum(Y)
+  allN = len(Y) - sum(Y)
+
+  predY = sorted(zip(pred, Y), reverse = True)
+  predSorted = [ a for (a,b) in predY ]
+  Y = [ b for (a,b) in predY ]
+
+  for i in range(len(uniquePred)) :    
+    # if i % 50 == 0 : print 'processing %d' % i
+    tmp = Y[:predSorted.index(uniquePred[i])]
+
+    TPR.append( float(sum(tmp)) / float(allP) )
+    FPR.append( float((len(tmp)-sum(tmp))) / float(allN) )
+
+  # added this because list.index() returns the first occurance
+  TPR.append( 1.0 )
+  FPR.append ( 1.0 )
+ 
   return(TPR,FPR)
 
 def calcFDR(Y,pred,ctrl):
+  print '--------------------------------'
+  print '- calcFDR'
+
   sens = []
-  FDR = []
+
   pvalue = [ calcPvalue(a, ctrl) for a in pred ]
-  # print 'pvalue is ', pvalue[:10]
   pvalue = adjustFDR(pvalue)
-  # print 'adjusted pvalue is ', pvalue[:10]
-  Y = [ b for (a,b) in sorted(zip(pvalue,Y)) ]
-  pvalue = sorted(pvalue)
-  # print 'adjust p value largest is ', pvalue[-1]
-  for i in range(len(Y)) :
-    sens.append( float(sum(Y[:i]))/float(sum(Y)))
-  return(sens,pvalue)
+
+  # use only unqiue values by get set()
+  uniquePvalue = sorted(list(set(pvalue)))
+  # print '- calcFDR: # of unique pred is ', len(uniquePvalue) 
+  # print 'uniquePred is ', uniquePvalue[:10]
+
+  pvalueY = sorted(zip(pvalue, Y))
+  pvalueSorted = [ a for (a,b) in pvalueY ]
+  Y = [b for (a,b) in pvalueY]
+
+  for i in range(len(uniquePvalue)) :
+    sens.append( float(sum(Y[:pvalueSorted.index(uniquePvalue[i])])) / float(sum(Y)))
+  
+  sens.append( 1.0 )
+  uniquePvalue.append ( 1.0 )
+
+  return(sens,uniquePvalue)
 
 def calcPvalue(value, ctrl) :
   return float(sum([ int(a >= value) for a in ctrl]))/float(len(ctrl))
 
 # @NOTE: if adjusted p value exceeds 1, should make it 1!
 def adjustFDR(pvalue):
+  print '--------------------------------'
+  print '- adjustFDR'
+
   pvalueSorted = sorted(pvalue)
   return [ min(p*float(len(pvalue))/(pvalueSorted.index(p)+1.0), 1.0) for p in pvalue ]
 
 # ranked by predicted value in calcTrueFDR
 def calcTrueFDR(Y, pred):
+  print '--------------------------------'
+  print '- calcTrueFDR'
+
   sens = []
   FDR = []
-  Y = [ b for (a,b) in sorted(zip(pred,Y), reverse = True) ]
-  for i in range(len(Y)) :
-    sens.append(float(sum(Y[:i]))/float(sum(Y)))
-    FDR.append( float(i-sum(Y[:i])) / float(i) )
+
+  # use only unqiue values by get set()
+  uniquePred = sorted(list(set(pred)), reverse = True)
+  # print '- calcTrueROC: # of unique pred is ', len(uniquePred)
+
+  allP = sum(Y)
+  allN = len(Y) - sum(Y)
+
+  predY = sorted(zip(pred, Y), reverse = True)
+  predSorted = [ a for (a,b) in predY ]
+  Y = [ b for (a,b) in predY ]
+
+  for i in range(len(uniquePred)) :
+    tmp = Y[:predSorted.index(uniquePred[i])]
+    # print '-trueFDR, tmp is ', tmp
+    # print '- trueFDR, len(tmp) is %d' % len(tmp)
+    sens.append( float(sum(tmp)) / float(allP) )
+    if len(tmp) == 0:
+      FDR.append(0.0)
+    else :  
+      FDR.append( float(len(tmp)-sum(tmp)) / float(len(tmp)) )
+
+    # print '- trueFDR, latest FDR is %f' % FDR[-1]
+
+  # added this because list.index() returns the first occurance
+  sens.append( 1.0 )
+  FDR.append ( float(len(Y) - sum(Y)) / float(len(Y)) )
+
   # make sure true FDR is increasing
   ##  need adjust from last FDR to first FDR
-  for i in reversed(range(1,len(Y)) :
+  for i in reversed(range(1,len(FDR))) :
     if FDR[i] < FDR[i-1] :
       FDR[i-1] = FDR[i]
   
@@ -421,15 +483,26 @@ def main(argv) :
   predictModels(trainFile + '_train', testFile, model)
 
   # collect results
+  start = time.time()
   ## collect train
   (trainYs, trainResult) = collectResults(trainFile + '_train', \
       trainFile + '_train', model) 
+  elapsed = time.time() - start
+  print '- time elapsed ', elapsed
+
   ## collect control
+  start = time.time()
   (controlYs, controlResult) = collectResults(trainFile + '_train', \
       trainFile + '_control', model) 
+  elapsed = time.time() - start
+  print '- time elapsed ', elapsed
+
   ## collect test
+  start = time.time()
   (testYs, testResult) = collectResults(trainFile + '_train', \
       testFile, model) 
+  elapsed = time.time() - start
+  print '- elapsed time is ', elapsed
 
   weights = getVotingWeights(trainYs, trainResult)
   top = 3
@@ -455,6 +528,7 @@ def main(argv) :
   writeFormatted(controlYs, controlResult, outputFileControl)
 
   # calculate ROC
+  start = time.time()
   testROC = []
   testAUC = []
   print '--------------------------------------'
@@ -468,25 +542,33 @@ def main(argv) :
 
   outputFileROC = ''.join( ['../',os.path.basename(trainFile), \
       os.path.basename(testFile),','.join(tmpmodel), '_rocResult'] )
+  elapsed = time.time() - start
+  print 'elapsed time is ', elapsed
 
   f = open(outputFileROC, 'w')
 
-  # print 'len(testROC) is %d' % len(testROC)
-  # print 'len(testROC[0]) is %d' % len(testROC[0])
+  # now ROC have different lens for different models
+  # as we use the unique values
+  lenROC = [ len(a) for a in testROC ]
 
-  for j in range(len(testROC[0])):
+  for j in range( max(lenROC) ):
     for i in range(len(testROC)):
       if i == len(testROC) - 1:
-        f.write(repr(testROC[i][j])+'\n')
+        try: 
+          f.write(repr(testROC[i][j])+'\n')
+        except IndexError:
+          f.write('NA'+'\n')
       else:
-        f.write(repr(testROC[i][j])+' ')
-
+        try: 
+          f.write(repr(testROC[i][j])+' ')
+        except IndexError:
+          f.write('NA'+' ')
   f.close()
-
   print '--------------------------------------'
   print '- calculating est FDR'
 
   # calculate est FDR
+  start = time.time()
   estFDR = []
   estFDRAUC = []
   for i in range(len(testResult)) :
@@ -498,22 +580,34 @@ def main(argv) :
 
   outputFileEstFDR = ''.join( ['../',os.path.basename(trainFile), \
       os.path.basename(testFile),','.join(tmpmodel), '_estFDRResult'] )
+  elapsed = time.time() - start
+  print 'elapsed time is ', elapsed
 
   f = open(outputFileEstFDR, 'w')
 
-  for j in range(len(estFDR[0])):
+  # now estFDR have different lens for different models
+  # as we use the unique values
+  lenEstFDR = [ len(a) for a in estFDR ]
+
+  for j in range( max(lenEstFDR) ):
     for i in range(len(estFDR)):
       if i == len(estFDR) - 1:
-        f.write(repr(estFDR[i][j])+'\n')
+        try:
+          f.write(repr(estFDR[i][j])+'\n')
+        except IndexError:
+          f.write('NA'+'\n')
       else:
-        f.write(repr(estFDR[i][j])+' ')
+        try:
+          f.write(repr(estFDR[i][j])+' ')
+        except IndexError:
+          f.write('NA'+' ')
 
   f.close()
 
   # calculate true FDR
   print '--------------------------------------'
   print '- calculating true FDR'
-
+  start = time.time()
   trueFDR = []
   trueFDRAUC = []
   for i in range(len(testResult)) :
@@ -526,18 +620,45 @@ def main(argv) :
   outputFileTrueFDR = ''.join( ['../',os.path.basename(trainFile), \
       os.path.basename(testFile),','.join(tmpmodel), '_trueFDRResult'] )
 
+  elapsed = time.time() - start
+  print '- elapsed time is ', elapsed
+
   f = open(outputFileTrueFDR, 'w')
 
-  for j in range(len(trueFDR[0])):
+  # now trueFDR have different lens for different models
+  # as we use the unique values
+  lenTrueFDR = [ len(a) for a in trueFDR ]
+
+  for j in range( max(lenTrueFDR) ):
     for i in range(len(trueFDR)):
       if i == len(trueFDR) - 1:
-        f.write(repr(trueFDR[i][j])+'\n')
+        try:
+          f.write(repr(trueFDR[i][j])+'\n')
+        except IndexError:
+          f.write('NA'+'\n')
       else:
-        f.write(repr(trueFDR[i][j])+' ')
+        try:
+          f.write(repr(trueFDR[i][j])+' ')
+        except IndexError:
+          f.write('NA'+' ')
 
   f.close()
 
-
+  # write AUC
+  outputFileAUC = ''.join( ['../',os.path.basename(trainFile), \
+      os.path.basename(testFile),','.join(tmpmodel), '_AUC'] )
+  f = open(outputFileAUC, 'w')
+  f.write(' '.join(model))
+  f.write('\n')
+  f.write(' '.join([ repr(a) for a in testAUC ]))
+  f.write('\n')
+  f.write(' '.join([ repr(a) for a in estFDRAUC ]))
+  f.write('\n')
+  f.write(' '.join([ repr(a) for a in trueFDRAUC ]))
+  f.write('\n')
+ 
+  f.close()
+  
   # plot
   ## R script: plot 3 figures
   ## ROC, TPR~estFDR, TPR~trueFDR
