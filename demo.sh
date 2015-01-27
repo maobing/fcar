@@ -21,6 +21,7 @@
 
 COMMENT
 
+<<COMMENT1
 #----------------
 # extractFeature
 # DNaseFlash
@@ -31,4 +32,18 @@ COMMENT
 python votingModel_inference.py -model LogisticRegressionL1,LogisticRegressionL2,RandomForest -train ../CMYCOutputFeature_2cat_SRR_filtered.txt_5_1000 -test ../CTCFOutputFeature_Ag09319_genomewide.txt_5_1000 -output default -k 2
 
 python votingModel_inference.py -model LogisticRegressionL1,LogisticRegressionL2,RandomForest -train ../GABPOutputFeature_2cat_SRR_filtered.txt_5_1000 -test ../CTCFOutputFeature_Ag09319_genomewide.txt_5_1000 -output default -k 2
+COMMENT1
+
+
+#--------------
+# whole pipeline for ChIPseq
+#--------------
+# CTCF --> EGR1
+
+./countCoverage -i ../bamsFile_ChIPseq -p ../param_ChIPseq
+./extractFeature -i ../coveragesFile_ChIPseq  -t ../CTCFData_narrowPeak_2cat.txt -o ../CTCFOutputFeature_2cat_ChIPseq.txt -p ../param_ChIPseq
+./extractFeature -i ../coveragesFile_ChIPseq  -t ../EGR1Data_narrowPeak_Gm12878_genomewide.txt -o ../EGR1OutputFeature_Gm12878_genomewide_ChIPseq.txt -p ../param_ChIPseq
+
+python votingModel_inference.py -model LogisticRegressionL1,LogisticRegressionL2,RandomForest -train ../CTCFOutputFeature_2cat_ChIPseq.txt_5_1000 -test ../EGR1OutputFeature_Gm12878_genomewide_ChIPseq.txt_5_1000 -output default -k 3
+
 

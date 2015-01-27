@@ -316,10 +316,10 @@ def calcAUC(y,x) :
   if len(x) != len(y):
     print 'x y lens differ!'
     return -1
-  # assumed that y, x are sorted in increasing order
+  # assumed that y, x are sorted in decreasing order
   area = 0.0
   for i in range(1,len(y)):
-    area += 1.0/2.0*(y[i-1]+y[i])*(x[i]-x[i-1])
+    area += 1.0/2.0*(y[i-1]+y[i])*(x[i]-x[i-1])*(-1)
   return area
 
 
@@ -328,8 +328,7 @@ def calcAUC(y,x) :
 def uniqueValueIdx(a):
   d = collections.defaultdict(list)
   for i,j in enumerate(a):
-    if len(d[j]) == 0:
-      d[j].append(i)
+    d[j].append(i)
   return d
 
 def doInference(Y, pred, ctrl):
@@ -350,64 +349,65 @@ def doInference(Y, pred, ctrl):
   allN = all - allP
 
   # sort Y according to pred
-  predY = sorted(zip(pred, Y), reverse = True)
+  predY = sorted(zip(pred, Y))
   predSorted = [ a for (a,b) in predY ]
   YSorted = [ b for (a,b) in predY ]
 
   # use only unqiue values by get set()
-  uniquePred = sorted(list(set(pred)), reverse = True)
-  # get p value for each unique pred values for estFDR
-  uniquePvalue = [ calcPvalue(a,ctrl) for a in uniquePred ]   
-
+  uniquePred = sorted(list(set(pred)))
   uniquePredIdx = uniqueValueIdx(predSorted)
+  # get p value for each unique pred values for estFDR
+  # @IMPORTANT: uniquePvalues have duplicates, when get
+  ##  their rank (k) to adjust for pvalue, be careful
+  uniquePvalue = [ calcPvalue(a,ctrl) for a in uniquePred ]   
+  # @ADDED: the BH method of p.adjust is not merely p*m/k
+  # REF: R source code for p.adjust fdr,
+  # http://r.789695.n4.nabble.com/BH-correction-with-p-adjust-tc4671988.html#none
+  tmpMin = 0.0
 
-  # ROC and trueFDR
+  # inference
   for i in range(len(uniquePred)) :
 
     tmpIdx = uniquePredIdx[uniquePred[i]][0]
-    tmpY = YSorted[:tmpIdx]
+    tmpY = YSorted[tmpIdx:]
+    sumTmpY = sum(tmpY)
+    lenTmpY = len(tmpY)
 
     # sens
-    sens.append( float(sum(tmpY)) / float(allP) )
+    sens.append( float(sumTmpY) / float(allP) )
     # FPR
-    FPR.append( float((len(tmpY)-sum(tmpY))) / float(allN) )
+    FPR.append( float((lenTmpY-sumTmpY)) / float(allN) )
     # true FDR
-    if len(tmpY) == 0: 
-      trueFDR.append( 0.0 )
-    else:  
-      trueFDR.append( float((len(tmpY)-sum(tmpY))) / float(len(tmpY)) )
+    trueFDR.append( float(lenTmpY-sumTmpY) / float(len(tmpY)) )
     # est FDR
-    estFDR.append( min(uniquePvalue[i] * float(all) / (tmpIdx+1.0), 1.0) )
+    tmpEstFDR = uniquePvalue[i] * float(all) / ( float(all - tmpIdx) )
+    if i == 0: 
+      tmpMin = tmpEstFDR
+    elif tmpEstFDR < tmpMin :
+      tmpMin = tmpEstFDR
+    estFDR.append( min(tmpMin, 1.0) )
 
-  # at the end, append 1.0
-  sens.append( 1.0 )
-  FPR.append( 1.0 )
-  estFDR.append( 1.0 )
-  trueFDR.append ( float(all - allP) / float(all) )
+  # add last values
+  sens.append( 0.0 )
+  FPR.append( 0.0 )
+  trueFDR.append( 0.0 )
+  estFDR.append( 0.0 )
 
-  # make sure true FDR is increasing
+  # make sure true FDR is decreasing
   ##  need adjust from last FDR to first FDR
-  for i in reversed(range(1,len(trueFDR))) :
-    if trueFDR[i] < trueFDR[i-1] :
-      trueFDR[i-1] = trueFDR[i]
+  for i in range(1,len(trueFDR)) :
+    if trueFDR[i-1] < trueFDR[i] :
+      trueFDR[i] = trueFDR[i-1]
+
+  # adjustPvalue has a problem, rank (k) is discrete
+  uniqueEstFDR = uniqueValueIdx(uniquePvalue)
+
 
   # return
   return (sens, FPR, estFDR, trueFDR)
 
 def calcPvalue(value, ctrl) :
-  return float(sum([ int(a >= value) for a in ctrl]))/float(len(ctrl))
-
-# @NOTE: if adjusted p value exceeds 1, should make it 1!
-def adjustFDR(uniquePvalue, uniquePred, predSorted):
-  print '--------------------------------'
-  print '- adjustFDR'
-  # pvalue assumed sorted in increasing order
-  ## corresponding to decreasing order of pred
-  adjustP = []
-  for i in range(pvalue):
-    adjustP.append( min(p*float(len(predSorted))/(predSorted.index(uniquePred[i])+1.0), 1.0) )
-  return adjustP
-
+  return float(sum(( int(a >= value) for a in ctrl )))/float(len(ctrl))
 
 # main
 # @NOTE: after adding inference

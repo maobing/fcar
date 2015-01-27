@@ -434,7 +434,7 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
       if (tidmap[read->core.tid] < NUM_SEQ) {
         int startBin, endBin;
         startBin = (int)((float)read->core.pos / (float)param->resolution + 0.5);
-        endBin = (int)((float)(read->core.pos + read->core.l_qseq + 14) / (float)param->resolution + 0.5); // added shift 14
+        endBin = (int)((float)(read->core.pos + read->core.l_qseq) / (float)param->resolution + 0.5);
 
         int b;
         for(b = startBin; b <= endBin; b++) {
