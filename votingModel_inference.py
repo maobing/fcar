@@ -16,6 +16,7 @@
 #-----------------------------------------
 import shlex, subprocess, sys
 import os.path, re, time
+import collections
 import createBenchmarkFeature as bm
 
 #---
@@ -321,6 +322,16 @@ def calcAUC(y,x) :
     area += 1.0/2.0*(y[i-1]+y[i])*(x[i]-x[i-1])
   return area
 
+
+## get index to unique values in a list
+## ref: http://stackoverflow.com/questions/27411142/how-to-get-lists-of-indices-to-unique-values-efficiently
+def uniqueValueIdx(a):
+  d = collections.defaultdict(list)
+  for i,j in enumerate(a):
+    if len(d[j]) == 0:
+      d[j].append(i)
+  return d
+
 def doInference(Y, pred, ctrl):
   # y axis for all 3 plots
   sens = []
@@ -348,10 +359,12 @@ def doInference(Y, pred, ctrl):
   # get p value for each unique pred values for estFDR
   uniquePvalue = [ calcPvalue(a,ctrl) for a in uniquePred ]   
 
+  uniquePredIdx = uniqueValueIdx(predSorted)
+
   # ROC and trueFDR
   for i in range(len(uniquePred)) :
 
-    tmpIdx = predSorted.index(uniquePred[i])
+    tmpIdx = uniquePredIdx[uniquePred[i]][0]
     tmpY = YSorted[:tmpIdx]
 
     # sens
@@ -479,8 +492,6 @@ def main(argv) :
   
   # conduct inference
   start = time.time()
-  print '--------------------------------------'
-  print '- doing Inference for'
 
   ## ROC
   testROC = []
@@ -493,7 +504,8 @@ def main(argv) :
   trueFDRAUC = []
 
   for i in range(len(testResult)) :
-    print '- ', model[i]
+    print '--------------------------------------'
+    print '- doing Inference for ', model[i]
 
     (sensi, FPRi, estFDRi, trueFDRi) = doInference(testYs, testResult[i], controlResult[i])
 
