@@ -14,12 +14,11 @@ weights = as.numeric(strsplit(x = args[4],split=",")[[1]])
 top = as.numeric(args[5])
 
 testResult = read.table(outputFile, stringsAsFactor = FALSE)
-controlResult =  read.table(outputFileControl, stringsAsFactor = FALSE)
-
 for(i in 2:ncol(testResult)) {
 	testResult[,i] = as.numeric(unlist(strsplit(x = testResult[,i], split = ":"))[(1:(nrow(testResult)*2)) %% 2 == 0])
 }
 
+controlResult =  read.table(outputFileControl, stringsAsFactor = FALSE)
 for(i in 2:ncol(controlResult)) {
   controlResult[,i] = as.numeric(unlist(strsplit(x = controlResult[,i], split = ":"))[(1:(nrow(controlResult)*2)) %% 2 == 0])
 }
