@@ -6,7 +6,6 @@
 #define MAX_TRAINING_REGIONS 1000000
 #define NUM_SEQ 23 // chrY & chrM excluded
 
-
 /*-----------------------------*/
 /*         struct              */
 /*-----------------------------*/
