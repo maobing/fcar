@@ -247,7 +247,7 @@ int parseParam(char *paramFile, struct extractFeatureParam *param){
     exit(EXIT_FAILURE);
   }
 
-  printf("\n\n/*------------------------------------*/\n");
+  // printf("\n\n/*------------------------------------*/\n");
   while (!feof(paramFileFp)){
     char *name = (char *)calloc(MAX_DIR_LEN, sizeof(char));
     char *value = (char *)calloc(MAX_DIR_LEN, sizeof(char));
@@ -256,33 +256,33 @@ int parseParam(char *paramFile, struct extractFeatureParam *param){
 
     if (strcmp(name, "resolution") == 0){
       param->resolution = atoi(value);
-      printf("/* %s is %s\n", name, value);
+      //printf("/* %s is %s\n", name, value);
     }
     else if (strcmp(name, "windowSize") == 0){
       param->windowSize = atoi(value);
-      printf("/* %s is %s\n", name, value);
+      //printf("/* %s is %s\n", name, value);
     }
     else if (strcmp(name, "pairend") == 0) {
       param->pairend = atoi(value);
-      printf("/* %s is %s\n", name, value);
+      //printf("/* %s is %s\n", name, value);
     }
     // added min max length of fragment for pairend data
     else if (strcmp(name, "min") == 0) {
       param->min = atoi(value);
-      printf("/* %s is %s\n", name, value);
+      //printf("/* %s is %s\n", name, value);
     }
     else if (strcmp(name, "max") == 0) {
       param->max = atoi(value);
-      printf("/* %s is %s\n", name, value);
+      //printf("/* %s is %s\n", name, value);
     }
     else {
-      printf("/* Warning: unkown parameters %s=%s, ignored\n", name, value);
+      //printf("/* Warning: unkown parameters %s=%s, ignored\n", name, value);
     }
 
     free(name);
     free(value);
   }
-  printf("/*------------------------------------*/\n\n");
+  // printf("/*------------------------------------*/\n\n");
   
   fclose(paramFileFp);
   return 0;

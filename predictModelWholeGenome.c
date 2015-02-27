@@ -220,9 +220,10 @@ int predictModelWholeGenome(char *method, char *trainedModel, char *trainFile, c
   }
 
   // read in feature for each bin and do prediction
-  for(i = 0; i < NUM_SEQ; i++) {
+  // for(i = 0; i < NUM_SEQ; i++) {
+  for(i = 20; i < 21; i++) {
     for(j = 0; j < (int)(chrlen[i] / param->resolution) + 1; j++) {
-      if(j % 1000 == 0) {
+      if(j % 100000 == 0) {
         printf("Predicting chr%d:%dth bin\n", i,j);
       }
       int max_nr_feature = 100;
@@ -230,23 +231,26 @@ int predictModelWholeGenome(char *method, char *trainedModel, char *trainFile, c
       int idx = 0;
       for(k = 0; k < totalCoverageFiles; k++) {
         float *buffer = (float *)calloc( param->windowSize/param->resolution,sizeof(float));
-        int offset;
-        if(i != 0) offset = cumBins[i-1] + j;
-        if(i == 0) offset = j;
+        int offset = j;
         offset += -(int)((float)(param->windowSize / 2) / (float)param->resolution + 0.5);
         if(offset < 0 || offset + (int)((float)(param->windowSize) / (float)param->resolution + 0.5) > (int)(chrlen[i] / param->resolution) + 1) {
-          predResult[i][j] = 0.0;
+          // printf("offset is %d\n", offset);
+          free(buffer);
           continue;
         }
-        fseek(coverageFps[k], offset, SEEK_SET);
+        if(i != 0) offset += cumBins[i-1];
+        // printf("offset is %d\n", offset);
+        fseek(coverageFps[k], offset*sizeof(float), SEEK_SET);
         fread(buffer, sizeof(float), param->windowSize/param->resolution, coverageFps[k]);
         int l;
+        // printf("buffer[%d] is:",l);
         for(l = 0; l < param->windowSize/param->resolution; l++) {
+          // if(j == 289540) printf("%f,",buffer[l]);
           if(buffer[l] != 0) {
-            myX[idx].index = idx + 1;
+            myX[idx].index = k*(param->windowSize/param->resolution) + l + 1;
             myX[idx].value = buffer[l];
+            idx++;
           }
-          idx++;
           if(idx >= max_nr_feature -2) { // feature_node is not long enough
             max_nr_feature *= 2;
             myX = (struct feature_node *)realloc(myX, max_nr_feature*sizeof(struct feature_node));
@@ -254,7 +258,16 @@ int predictModelWholeGenome(char *method, char *trainedModel, char *trainFile, c
         }
         free(buffer);
       } // end of loop through coverageFiles
-      // predict_probability(mymodel, myX, prob_estimates);
+      // printf("\n");
+      myX[idx].index = -1; // a flag for end of features
+      if(idx == 0) {
+        // printf("idx is %d\n",idx);
+        predResult[i][j] = 0.0;
+        free(myX);
+        continue;
+      }
+      // printf("nr_feature is %d\n", idx);
+      predict_probability(mymodel, myX, prob_estimates);
       // printf("num of feature is %d\n", get_nr_feature(mymodel));
       // printf("num of class is %d\n", get_nr_class(mymodel));
       predResult[i][j] = prob_estimates[0];
