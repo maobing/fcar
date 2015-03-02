@@ -1,3 +1,7 @@
+/* 2015-02-27 BH
+ * Update this script using num of threads specified by
+ * users
+ */
 /*
  * 2015-02-13 BH
  * This script directly use liblinear class interface
@@ -16,9 +20,6 @@
 #include "./liblinear-1.96/linear.h"
 #include "./liblinear-1.96/tron.h"
 
-// define the size of my pool of threads, 23, one per chr
-#define NUM_THREADS 23
-
 // use extern in fcar.h
 // Note: this can be shared among all threads
 extern const uint32_t chrlen[];
@@ -26,12 +27,10 @@ extern const uint32_t chrlen[];
 // create thread argument struct for thr_func()
 // which contains args to be passed to thr_func()
 typedef struct _thread_data_t {
-  char *method;
+  int tid; // thread id
   char *trainedModel;
-  char *trainFile;
   char *coverageFileList;
   char *paramFile;
-  int chr; // specifying which chr for which thread
 } thread_data_t;
 
 // thread function 
@@ -57,25 +56,16 @@ int menu_predictModelWholeGenome(int argc, char **argv) {
 
 	/* ------------------------------- */
 	/*        predictModel             */
-	/* -m method name                  */
   /* -tm trainedModel                */
-  /* -train trainingFile             */
-  /* do not need testing file, as    */
-  /* it is assumed whole genome      */
   /* -coverage coverageFileList      */
 	/* -o output results               */
+  /* -p param                        */
 	/* ------------------------------- */
 
 	if (argc == 1) {
 		printf("/*------------------------------------*/\n");
 		printf("/*    menu_predictModelGenomeWide     */\n");
-		printf("/* -m method name                     */\n");
-		printf("/*    LogisticRegressionL1            */\n");
-		printf("/*    LogisticRegressionL2            */\n");
-		printf("/*    SVM                             */\n");
-		printf("/*    RandomFores                     */\n");
     printf("/* -tm trainedModel                   */\n");
-    printf("/* -train trainFile                   */\n");
     printf("/* -coverage coverageFileList         */\n");
 		printf("/* -o output results                  */\n");
     printf("/* -p param                           */\n");
@@ -84,9 +74,7 @@ int menu_predictModelWholeGenome(int argc, char **argv) {
 	}
 
 
-  char *method = (char *)calloc(MAX_DIR_LEN, sizeof(char));
 	char *trainedModel = (char *)calloc(MAX_DIR_LEN, sizeof(char));
-	char *trainFile = (char *)calloc(MAX_DIR_LEN, sizeof(char)); 
   char *coverageFileList = (char *)calloc(MAX_DIR_LEN, sizeof(char));
 	char *outputFile = (char *)calloc(MAX_DIR_LEN, sizeof(char));
   char *paramFile = (char *)calloc(MAX_DIR_LEN, sizeof(char));
