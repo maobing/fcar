@@ -2,42 +2,33 @@
 /*         macro               */
 /*-----------------------------*/
 #define MAX_DIR_LEN 255
-#define MAX_BAM_FILES 400
-#define MAX_TRAINING_REGIONS 1000000
-#define NUM_SEQ 23 // chrY & chrM excluded
+#define MAX_BAM_FILES 10
+#define MAX_TRAINING_REGIONS 1000
 
 /*-----------------------------*/
 /*         struct              */
 /*-----------------------------*/
 
-/* extract feature parameters */
-struct extractFeatureParam {
-	
-	/* length of bin for calculating coverage*/
+/* struct to hold info about a 
+ * high-throughput sequencing file
+ */
+struct htsFile_ {
 	int resolution;
-	
-	/* window size for extracting feature */
-	int windowSize;
-
-	/* bams are pairend */
-	int pairend;
-
-  /* min fragment length filter for pairend */
-  int min;
-  
-  /* max fragment length filter for pairend */
-  int max;
+	int windowSize; // units: bp
+	int pairend; 
+  int min; // min fragment length filter for pairend
+  int max; // max fragment length filter for pairend
 };
 
 /* training region */
-struct trainingRegion{
+struct trainingRegion_{
 	int chr;
 	int coordinate;
 	int response;
 };
 
 /* model matrix */
-struct modelMatrix {
+struct modelMatrix_ {
 	int n;
 	int p;
 	float **features;
@@ -47,17 +38,17 @@ struct modelMatrix {
 /*------------------------------*/
 /*        extractFeature        */
 /*------------------------------*/
-int extractFeature(char *coveragesFile, char *trainingFile, char *outputFile, char *paramFile);
+int extractFeature(char *trainingRegionsFile, char *outputFile, char *htsFilesList);
 
 /*------------------------------*/
-/*        parseParam            */
+/*        parseHtsFile            */
 /*------------------------------*/
-int parseParam(char *paramFile, struct extractFeatureParam *param);
+int parseHtsFile(char *file, struct htsFile_ *htsFiles);
 
 /*------------------------------*/
 /*            extract           */
 /*------------------------------*/
-struct modelMatrix *extract(char *coveragesFile, char *trainingFile, struct extractFeatureParam *param);
+struct modelMatrix *extract(char *trainingRegionsFile, struct htsFile_ *htsFile);
 
 /*------------------------------*/
 /*    extractFeature core       */

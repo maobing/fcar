@@ -22,22 +22,27 @@ extern const uint32_t chrlen[] = { 249250621, 243199373, 198022430, 191154276, 1
 /*     extractFeature()       */
 /* extract feature from input */
 /*----------------------------*/
-int extractFeature(char *coveragesFile, char *trainingFile, char *outputFile, char *paramFile) {
+int extractFeature(char *trainingRegionsFile, char *outputFile, char *htsFilesList) {
 
   /* initialize param */
-  struct extractFeatureParam *param = (struct extractFeatureParam *)calloc(1, sizeof(struct extractFeatureParam));
-  struct modelMatrix *modelMatrix = (struct modelMatrix *)calloc(1, sizeof(struct modelMatrix));
+  struct htsFile_ *htsFiles = (struct htsFile_ *)calloc(MAX_BAM_FILES, sizeof(struct htsFile));
+  struct modelMatrix_ *modelMatrix = (struct modelMatrix *)calloc(1, sizeof(struct modelMatrix));
+  int totalHtsFiles; 
 
   /* parse pars */
-  parseParam(paramFile, param);
+  totalHtsFiles = parseHtsFile(htsFileList, htsFiles);
+  if(totalHtsFiles < 0) {
+    printf("error: parsing htsFileList %s\n", htsFileList);
+    return(-1);
+  }
 
   /* extract feature */
-  modelMatrix = extract(coveragesFile, trainingFile, param);
+  modelMatrix = extract(trainingRegionsFile, htsFileList, totalHtsFiles);
 
   /* save feature */
-  saveModelMatrix(modelMatrix, param, outputFile);
+  saveModelMatrix(modelMatrix, htsFileList, totalHtsFiles, outputFile);
 
-  free(param);
+  free(htsFiles);
   free(modelMatrix);
   return 0;
 }
@@ -46,39 +51,37 @@ int extractFeature(char *coveragesFile, char *trainingFile, char *outputFile, ch
 /*          saveModelMatrix                */
 /* save modelMatirx                        */
 /* i.e., extracted features                */
+/* outputFormat, see libSVM                */
 /*-----------------------------------------*/
-int saveModelMatrix(struct modelMatrix *modelMatrix, struct extractFeatureParam *param, char *outputFile) {
+int saveModelMatrix(struct modelMatrix_ *modelMatrix, char *outputFile) {
   
   int i, j;
-  char *outputFileName = (char *)calloc(MAX_DIR_LEN, sizeof(char));
   FILE *outputFileFp = NULL;
-
-  /* add param to output file name */
-  strcpy(outputFileName, outputFile);
-  char *tmp = (char *)calloc(10, sizeof(char));
-  sprintf(tmp, "_%d", param->resolution);
-  strcat(outputFileName, tmp);
-  sprintf(tmp, "_%d", param->windowSize);
-  strcat(outputFileName, tmp);
-  free(tmp);
 
   if ((outputFileFp = fopen(outputFileName, "w")) == NULL) {
     printf("Error: cannot open file %s\n", outputFileName);
     exit(EXIT_FAILURE);
   }
-  // changed input format to below: 
-  // 1 1:1.234 2:3.497
+
+  // further changed it to sparse representation with idx:0 omitted
   for (i = 0; i < modelMatrix->n; i++) {
     fprintf(outputFileFp, "%d ", modelMatrix->trainingRegions[i].response);
     for (j = 0; j < modelMatrix->p-1; j++) {
-      fprintf(outputFileFp, "%d:%.4f ", j+1, modelMatrix->features[i][j]);
+      if(modelMatrix->features[i][j] != 0.0) {
+        fprintf(outputFileFp, "%d:%.4f", j+1, modelMatrix->features[i][j]);
+      }
+      if(modelMatrix->features[i][j+1] != 0.0) fprintf(outputFileFp, " ");
     }
-    fprintf(outputFileFp, "%d:%.4f\n", modelMatrix->p, modelMatrix->features[i][modelMatrix->p - 1]);
+    if(modelMatrix->features[i][modelMatrix->p - 1] != 0.0) {
+      fprintf(outputFileFp, "%d:%.4f\n", modelMatrix->p, modelMatrix->features[i][modelMatrix->p - 1]);
+    }
+    else {
+      fprintf(outputFileFp, "\n");
+    }
   }
   
   fclose(outputFileFp);
-  printf("\nWriting features to output\n\n");
-  free(outputFileName);
+  printf("\nWriting features to output %s\n\n", outputFile);
   
   return 0;
 }
@@ -87,35 +90,10 @@ int saveModelMatrix(struct modelMatrix *modelMatrix, struct extractFeatureParam 
 /*                extract                  */
 /* extract features around training region */
 /*-----------------------------------------*/
-struct modelMatrix *extract(char *coveragesFile, char *trainingFile, 
-      struct extractFeatureParam *param){
+struct modelMatrix_ *extract(char *trainingRegionsFile, 
+      struct htsFile_ *htsFiles, int totalHtsFiles){
   
   int i;
-
-  /* read in bams file names */
-  int totalCoverages;
-  FILE *coveragesFileFp = NULL;
-  char **coverages = (char **)calloc(MAX_BAM_FILES, sizeof(char *));
-  for (i = 0; i < MAX_BAM_FILES; i++) {
-    coverages[i] = (char *)calloc(MAX_DIR_LEN, sizeof(char));
-  }
-
-  if ((coveragesFileFp = fopen(coveragesFile, "r")) == NULL) {
-    printf("Error: cannot open file %s\n", coveragesFile);
-    return EXIT_SUCCESS;
-  }
-
-  i = 0;
-  while (!feof(coveragesFileFp)) {
-    if (i >= MAX_BAM_FILES) {
-      printf("Error: the number of input coverages files exceeds the limit %d\n", i);
-      return EXIT_SUCCESS;
-    }
-    fscanf(coveragesFileFp, "%s\n", coverages[i]);
-    i++;
-  }
-  totalCoverages = i;
-  fclose(coveragesFileFp);
 
   /* read in training regions */
   int totalTrainingRegions;
@@ -140,9 +118,6 @@ struct modelMatrix *extract(char *coveragesFile, char *trainingFile,
       exit(EXIT_FAILURE);
     }
 
-    // if(i % 1000 == 0) {
-      // printf("reading %d %d %d\n", trainingRegions[i].chr, trainingRegions[i].coordinate, trainingRegions[i].response);
-    // }
     i++;
   }
   totalTrainingRegions = i;
