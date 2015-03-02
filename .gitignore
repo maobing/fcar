@@ -1,4 +1,7 @@
 *.sh.p*
 *.sh.e*
 *.sh.o*
+multiTEST_valgrind_qsub
+param
+predResult90.txt
 
