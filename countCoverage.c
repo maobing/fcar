@@ -18,55 +18,48 @@ int menu_countCoverage(int argc, char **argv) {
 
 	/* ------------------------------- */
 	/*        countCoverage            */
-	/* -i bamsFile                     */
-	/* -p paramFile                    */
+	/* -i htsFilesList                 */
+  /* @NOTE: this list contains both  */
+  /* file names and parameters       */
 	/* ------------------------------- */
 
 	if (argc == 1) {
 		printf("/*-----------------------------------*/\n");
 		printf("/*            extractFeature         */\n");
-		printf("/* -i bams file list                 */\n");
-		printf("/* -p parameter setting file         */\n");
+		printf("/* -i hts file list                  */\n");
 		printf("/*-----------------------------------*/\n");
-		exit(EXIT_SUCCESS);
+		return(0);
 	}
 
-	char *bamsFile = (char *)calloc(MAX_DIR_LEN, sizeof(char)); 
-	char *paramFile = (char *)calloc(MAX_DIR_LEN, sizeof(char));
+	char *htsFilesList = (char *)calloc(MAX_DIR_LEN, sizeof(char)); 
 	int ni;
-	int iOK = 0, pOK = 0;
+	int iOK = 0;
 
 	ni = 1;
 	while (ni < argc) {
 		if (strcmp(argv[ni], "-i") == 0) {
 			ni++;
-			strcpy(bamsFile, argv[ni]);
+			strcpy(htsFilesList, argv[ni]);
 			iOK = 1;
-		}
-		else if (strcmp(argv[ni], "-p") == 0){
-			ni++;
-			strcpy(paramFile, argv[ni]);
-			pOK = 1;
 		}
 		else {
 			printf("Error: unkown parameters!\n");
-			exit(EXIT_FAILURE);
+			return(-1);
 		}
 		ni++;
 	}
 
 	/* check args */
-	if ((iOK + pOK) < 2){
+	if (iOK < 1){
 		printf("Error: input arguments not correct!\n");
-		exit(EXIT_FAILURE);
+    return(-1);
 	}
 	else {
-		coverage(bamsFile, paramFile);
+		coverage(htsFilesList);
 	}
 
 	/* free pointers */
-	free(bamsFile);
-	free(paramFile);
+	free(htsFilesList);
 
 	return 0;
 }

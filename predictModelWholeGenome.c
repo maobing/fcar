@@ -162,7 +162,7 @@ int predictModelWholeGenome(char *method, char *trainedModel, char *trainFile, c
     printf("Cannot open file %s\n", coverageFileList);
     return -1;
   }
-  char **coverageFiles = (char **)calloc(MAX_BAM_FILES,sizeof(char *));
+  char **coverageFiles = (char **)calloc(max_bam_files,sizeof(char *));
   for(i = 0; i < MAX_BAM_FILES; i++) {
     coverageFiles[i] = (char *)calloc(MAX_DIR_LEN, sizeof(char));
   }

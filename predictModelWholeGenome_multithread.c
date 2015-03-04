@@ -1,12 +1,9 @@
-/* 2015-02-27 BH
- * Update this script using num of threads specified by
- * users
- */
 /*
- * 2015-02-13 BH
  * This script directly use liblinear class interface
  * to provide genome-wide scan prediction for ChIPseq
  * with multithread
+ * note that you need to request at least 32 threads,
+ * as I am assuming each thread handles one chr
  */
 // compile
 // g++ -Wall -o predictModelWholeGenome_multithread predictModelWholeGenome_multithread.c ./liblinear-1.96/tron.o ./liblinear-1.96/linear.o ./fcarLib.o ./liblinear-1.96/blas/blas.a -L/home/bst/student/bhe2/hji/samtools-0.1.18 -lbam -lz -lpthread
@@ -20,33 +17,29 @@
 #include "./liblinear-1.96/linear.h"
 #include "./liblinear-1.96/tron.h"
 
-// use extern in fcar.h
-// Note: this can be shared among all threads
-extern const uint32_t chrlen[];
-
+// #define NUM_THREADS NUM_SEQ
+#define Num_THREADS 3
 // create thread argument struct for thr_func()
-// which contains args to be passed to thr_func()
-typedef struct _thread_data_t {
-  int tid; // thread id
+struct thread_data_ {
+  int chr; 
   char *trainedModel;
-  char *coverageFileList;
-  char *paramFile;
-} thread_data_t;
+  struct htsFile_ *htsFiles;
+  int totalHtsFiles;
+};
 
 // thread function 
 void *predictModelWholeGenome( void *arg );
 
 // other function declaration
-int menu_predictModelWholeGenome(int argc, char **argv);
+int menu_predictModelWholeGenome( int argc, char **argv );
 
 /*------------------------*/
-/*  predictModel          */
+/*         main           */
 /*------------------------*/
 int main(int argc, char **argv) {
-	/* menu */
+
 	menu_predictModelWholeGenome(argc, argv);
 
-	/* exit */
 	exit(EXIT_SUCCESS);
 	
 }
@@ -57,63 +50,45 @@ int menu_predictModelWholeGenome(int argc, char **argv) {
 	/* ------------------------------- */
 	/*        predictModel             */
   /* -tm trainedModel                */
-  /* -coverage coverageFileList      */
+  /* -i htsFilesList                 */
 	/* -o output results               */
-  /* -p param                        */
 	/* ------------------------------- */
 
 	if (argc == 1) {
 		printf("/*------------------------------------*/\n");
 		printf("/*    menu_predictModelGenomeWide     */\n");
     printf("/* -tm trainedModel                   */\n");
-    printf("/* -coverage coverageFileList         */\n");
+    printf("/* -i htsFilesList                    */\n");
 		printf("/* -o output results                  */\n");
-    printf("/* -p param                           */\n");
 		printf("/*------------------------------------*/\n");
 		return(EXIT_SUCCESS);
 	}
 
 
 	char *trainedModel = (char *)calloc(MAX_DIR_LEN, sizeof(char));
-  char *coverageFileList = (char *)calloc(MAX_DIR_LEN, sizeof(char));
+  char *htsFilesList = (char *)calloc(MAX_DIR_LEN, sizeof(char));
 	char *outputFile = (char *)calloc(MAX_DIR_LEN, sizeof(char));
-  char *paramFile = (char *)calloc(MAX_DIR_LEN, sizeof(char));
 
 	int ni;
-	int mOK = 0, tmOK = 0, trainOK = 0, coverageOK = 0, oOK = 0, pOK = 0;
+	int tmOK = 0, iOK = 0, oOK = 0;
 
 	ni = 1;
 	while (ni < argc) {
-		if (strcmp(argv[ni], "-m") == 0) {
-			ni++;
-			strcpy(method, argv[ni]);
-			mOK = 1;
-		}
-		else if (strcmp(argv[ni], "-tm") == 0){
+		if (strcmp(argv[ni], "-tm") == 0) {
 			ni++;
 			strcpy(trainedModel, argv[ni]);
 			tmOK = 1;
 		}
-		else if (strcmp(argv[ni], "-train") == 0){
+		else if (strcmp(argv[ni], "-i") == 0){
 			ni++;
-			strcpy(trainFile, argv[ni]);
-			trainOK = 1;
-		}
-		else if (strcmp(argv[ni], "-coverage") == 0){
-			ni++;
-			strcpy(coverageFileList, argv[ni]);
-			coverageOK = 1;
+			strcpy(htsFilesList, argv[ni]);
+			iOK = 1;
 		}
 		else if (strcmp(argv[ni], "-o") == 0){
 			ni++;
 			strcpy(outputFile, argv[ni]);
 			oOK = 1;
 		}
-		else if (strcmp(argv[ni], "-p") == 0){
-			ni++;
-			strcpy(paramFile, argv[ni]);
-      pOK = 1;
-    }
 		else {
 			printf("Error: unkown parameters!\n");
 			return(EXIT_FAILURE);
@@ -122,27 +97,30 @@ int menu_predictModelWholeGenome(int argc, char **argv) {
 	}
 
 	/* check args */
-	if ((mOK + tmOK + trainOK + coverageOK + oOK + pOK) < 6){
+	if ((tmOK + iOK + oOK) < 3) {
 		printf("Error: input arguments not correct!\n");
 		exit(EXIT_FAILURE);
 	}
 
   // init thr
   pthread_t thr[NUM_THREADS];
-  // thread_data_t to be passed to each thread
-  thread_data_t thr_data[NUM_THREADS];
-  
+  // init thr_data
+  struct thread_data_ thr_data[NUM_THREADS];
+
+  // parse htsFilesList
+  int totalHtsFiles;
+  struct htsFile_ *htsFiles = (struct htsFile_ *)calloc(max_hts_files, sizeof(struct htsFile_));
+  totalHtsFiles = parseHtsFile(htsFilesList, &htsFiles);
+
   /* creat thread */
   int i, rc; // rc for holding error code
   for(i = 0; i < NUM_THREADS; i++) {
     thr_data[i].chr = i;
-    thr_data[i].method = method;
     thr_data[i].trainedModel = trainedModel;
-    thr_data[i].trainFile = trainFile;
-    thr_data[i].coverageFileList = coverageFileList;
-    thr_data[i].paramFile = paramFile;
+    thr_data[i].htsFiles = htsFiles;
+    thr_data[i].totalHtsFiles = totalHtsFiles;
     printf("creating %dth thread\n", i);
-    fflush(stdout); // flush stdout
+    fflush(stdout); 
     if( (rc = pthread_create(&thr[i], NULL, predictModelWholeGenome, &thr_data[i])) ) {
       printf("error: pthread_create, rc:%d\n", rc);
       return EXIT_SUCCESS;
@@ -157,33 +135,34 @@ int menu_predictModelWholeGenome(int argc, char **argv) {
   }
 
   /* write to output */
-  struct extractFeatureParam *param = (struct extractFeatureParam *)calloc(1,sizeof(struct extractFeatureParam));
-  parseParam(paramFile,param);
-
   FILE *outputFileFp = NULL;
   if( (outputFileFp = fopen(outputFile, "wb")) == NULL ) {
     printf("Error: cannot write to outputFile %s\n", outputFile);
     return EXIT_SUCCESS;
   }
   printf("writing to output %s\n", outputFile);
+
+  // we assume resolution for all htsFiles are the same
   for(i = 0; i < NUM_THREADS; i++) {
-    fwrite(predResult[i], sizeof(float),(int)(chrlen[i] / param->resolution)+1 , outputFileFp);
+    fwrite(predResult[i], sizeof(float), (int)(chrlen[i] / htsFiles[0].resolution)+1 , outputFileFp);
     free(predResult[i]);
   }
   fclose(outputFileFp);
   
 	/* free pointers */
-  free(method);
 	free(trainedModel);
-	free(trainFile);
-  free(coverageFileList);
+  free(htsFilesList);
 	free(outputFile);
-  free(paramFile);
-  free(param);
   free(predResult);
 
 	return 0;
 }
+
+
+
+/*---------------------------------------------------------------*/
+/*                      thread function                          */
+/*---------------------------------------------------------------*/
 
 /* thr_func: predictModel */
 // NOTE that pthread_create(pthread_t *thread, pthread_att_t *attr, 
@@ -191,23 +170,19 @@ int menu_predictModelWholeGenome(int argc, char **argv) {
 //    requires a pointer to a function which takes in and returns void pointers
 
 void *predictModelWholeGenome(void *arg) {
-  thread_data_t *data = (thread_data_t *) arg;
+  struct thread_data_ *data = (struct thread_data_ *) arg;
 
-  printf("data->trainedModel is %s\n", data->trainedModel);
-  printf("data->coverageFileList is %s\n", data->coverageFileList);
-  printf("data->trainFile %s\n", data->trainFile);
-  printf("data->paramFile %s\n", data->paramFile);
-  printf("data->chr is %d\n", data->chr);
+  // printf("data->trainedModel is %s\n", data->trainedModel);
+  // printf("data->chr is %d\n", data->chr);
 
   char *trainedModel = data->trainedModel;
-  char *coverageFileList = data->coverageFileList;
-  // char *trainFile = data->trainFile;
-  char *paramFile = data->paramFile;
+  struct htsFile_ *htsFiles = data->htsFiles;
   int chr = data->chr;
+  int totalHtsFiles = data->totalHtsFiles;
 
   // utility var
   int i,j,k;
-  
+ 
   // trainedModel
   struct model *mymodel;
   if( (mymodel = load_model(trainedModel)) == 0) {
@@ -215,45 +190,23 @@ void *predictModelWholeGenome(void *arg) {
     return EXIT_SUCCESS;
   }
 
-  // coverageFileList
-  int totalCoverageFiles;
-  FILE *coverageFileListFp = NULL;
-  if( (coverageFileListFp = fopen(coverageFileList, "r") ) == NULL) {
-    printf("Cannot open file %s\n", coverageFileList);
-    return EXIT_SUCCESS;
-  }
-  char **coverageFiles = (char **)calloc(MAX_BAM_FILES,sizeof(char *));
-  for(i = 0; i < MAX_BAM_FILES; i++) {
-    coverageFiles[i] = (char *)calloc(MAX_DIR_LEN, sizeof(char));
-  }
-  
-  i = 0;
-  while (!feof(coverageFileListFp)) {
-    if (i >= MAX_BAM_FILES) {
-      printf("Error: the number of input coverages files exceeds the limit %d\n", i);
-      return EXIT_SUCCESS;
-    }
-    if( ( fscanf(coverageFileListFp, "%s\n", coverageFiles[i]) ) != 1) {
-      printf("Error: reading %dth from %s\n", i, coverageFileList);
-      return EXIT_SUCCESS;
-    }
-    i++;
-  }
-  totalCoverageFiles = i;
-  fclose(coverageFileListFp);
+  // open coverage Files for htsFiles
+  // Note the name convension
+  FILE *coverageFps[totalHtsFiles];
+  for(i = 0; i < totalHtsFiles; i++) {
+    char *tmpFileName = (char *)calloc(MAX_DIR_LEN, sizeof(char));
+    strcpy(tmpFileName, htsFiles[i].file);
+    strcat(tmpFileName, ".coverage");
+    char tmpResolution[5];
+    sprintf(tmpResolution, "%d", htsFiles[i].resolution);
+    strcat(tmpFileName, tmpResolution);
 
-  // open coverage Files
-  FILE *coverageFps[totalCoverageFiles];
-  for(i = 0; i < totalCoverageFiles; i++) {
-    if( (coverageFps[i] = fopen(coverageFiles[i], "rb")) == NULL ) {
-      printf("Error opening coverage file %s\n", coverageFiles[i]);
+    if( (coverageFps[i] = fopen(tmpFileName, "rb")) == NULL ) {
+      printf("Error opening coverage file %s\n", tmpFileName);
       return EXIT_SUCCESS;
     }
+    free(tmpFileName);
   }
-
-  // paramFile
-  struct extractFeatureParam *param = (struct extractFeatureParam *)calloc(1, sizeof(struct extractFeatureParam));
-  parseParam(paramFile, param);
 
   // predict model: by default: predict probability
   int nr_class = get_nr_class(mymodel);
@@ -262,29 +215,30 @@ void *predictModelWholeGenome(void *arg) {
   // predResult for storing results
   int totalBins = 0;
   int cumBins[NUM_SEQ];
+  // we assum all htsFiles have the same resolution
   for (i = 0; i < NUM_SEQ; i++) {
-    totalBins += (int)(chrlen[i] / param->resolution) + 1;
+    totalBins += (int)(chrlen[i] / htsFiles[0].resolution) + 1;
     cumBins[i] = totalBins;
   }
 
   // allocate memory for result based on thread data chr
   // as we are using one thread for each chr
-  float *predResult = (float *)calloc( (int)(chrlen[chr] / param->resolution) + 1, sizeof(float));
+  float *predResult = (float *)calloc( (int)(chrlen[chr] / htsFiles[0].resolution) + 1, sizeof(float));
 
   // read in feature for each bin and do prediction
-  for(j = 0; j < (int)(chrlen[chr] / param->resolution) + 1; j++) {
-    if(j % 100000 == 0) {
+  for(j = 0; j < (int)(chrlen[chr] / htsFiles[0].resolution) + 1; j++) {
+    if(j % 1000000 == 0) {
       printf("Predicting chr%d:%dth bin\n", chr,j);
       fflush(stdout);
     }
     int max_nr_feature = 100;
     struct feature_node *myX = (struct feature_node *)calloc(max_nr_feature, sizeof(struct feature_node));
     int idx = 0;
-    for(k = 0; k < totalCoverageFiles; k++) {
-      float *buffer = (float *)calloc( param->windowSize/param->resolution,sizeof(float));
+    for(k = 0; k < totalHtsFiles; k++) {
+      float *buffer = (float *)calloc( htsFiles[k].windowSize/htsFiles[0].resolution,sizeof(float));
       int offset = j;
-      offset += -(int)((float)(param->windowSize / 2) / (float)param->resolution + 0.5);
-      if(offset < 0 || offset + (int)((float)(param->windowSize) / (float)param->resolution + 0.5) > (int)(chrlen[i] / param->resolution) + 1) {
+      offset += -(int)((float)(htsFiles[k].windowSize / 2) / (float)htsFiles[0].resolution + 0.5);
+      if(offset < 0 || offset + (int)((float)(htsFiles[k].windowSize) / (float)htsFiles[0].resolution + 0.5) > (int)(chrlen[i] / htsFiles[0].resolution) + 1) {
         // printf("offset is %d\n", offset);
         free(buffer);
         continue;
@@ -292,13 +246,13 @@ void *predictModelWholeGenome(void *arg) {
       if(chr != 0) offset += cumBins[chr-1];
       // printf("offset is %d\n", offset);
       fseek(coverageFps[k], offset*sizeof(float), SEEK_SET);
-      fread(buffer, sizeof(float), param->windowSize/param->resolution, coverageFps[k]);
+      fread(buffer, sizeof(float), htsFiles[k].windowSize/htsFiles[0].resolution, coverageFps[k]);
       int l;
       // printf("buffer[%d] is:",l);
-      for(l = 0; l < param->windowSize/param->resolution; l++) {
+      for(l = 0; l < htsFiles[k].windowSize/htsFiles[0].resolution; l++) {
         // if(j == 289540) printf("%f,",buffer[l]);
         if(buffer[l] != 0) {
-          myX[idx].index = k*(param->windowSize/param->resolution) + l + 1;
+          myX[idx].index = k*(htsFiles[k].windowSize/htsFiles[0].resolution) + l + 1;
           myX[idx].value = buffer[l];
           idx++;
         }
@@ -326,15 +280,10 @@ void *predictModelWholeGenome(void *arg) {
   }
 
 
-  for(i = 0; i < totalCoverageFiles; i++) {
+  for(i = 0; i < totalHtsFiles; i++) {
     fclose(coverageFps[i]);
   }
-  // free pointers
-  for(i = 0; i < MAX_BAM_FILES; i++) {
-    free(coverageFiles[i]);
-  }
-  free(coverageFiles);
-  free(param);
+  freeHtsFiles(htsFiles, totalHtsFiles);
   free(prob_estimates);
   // give address of pointer to this function, so that the function can free the pointer.
   free_and_destroy_model(&mymodel); 

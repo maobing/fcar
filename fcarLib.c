@@ -1,22 +1,15 @@
-#include "stdlib.h"
-#include "stdio.h"
-#include "string.h"
-#include "stdint.h"
-#include "math.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+#include <math.h>
 #include "fcarLib.h"
 #include "sam.h"
 #include "bam.h"
 
-
-/*------------------------------*/
-/*        static const          */
-/*------------------------------*/
-
-/* hard code hg19 genome length */
-extern const uint32_t chrlen[] = { 249250621, 243199373, 198022430, 191154276, 180915260, \
-171115067, 159138663, 146364022, 141213431, 135534747, 135006516, \
-133851895, 115169878, 107349540, 102531392, 90354753, 81195210, \
-78077248, 59128983, 63025520, 48129895, 51304566, 155270560 };
+/* glocal variable */
+int max_hts_files = 10;
+int max_training_regions = 1000;
 
 /*----------------------------*/
 /*     extractFeature()       */
@@ -25,24 +18,25 @@ extern const uint32_t chrlen[] = { 249250621, 243199373, 198022430, 191154276, 1
 int extractFeature(char *trainingRegionsFile, char *outputFile, char *htsFilesList) {
 
   /* initialize param */
-  struct htsFile_ *htsFiles = (struct htsFile_ *)calloc(MAX_BAM_FILES, sizeof(struct htsFile));
-  struct modelMatrix_ *modelMatrix = (struct modelMatrix *)calloc(1, sizeof(struct modelMatrix));
-  int totalHtsFiles; 
+  struct htsFile_ *htsFiles = (struct htsFile_ *)calloc(max_hts_files, sizeof(struct htsFile_));
+  struct modelMatrix_ *modelMatrix = (struct modelMatrix_ *)calloc(1, sizeof(struct modelMatrix_));
+  int totalHtsFiles;
 
   /* parse pars */
-  totalHtsFiles = parseHtsFile(htsFileList, htsFiles);
+  totalHtsFiles = parseHtsFile(htsFilesList, &htsFiles);
   if(totalHtsFiles < 0) {
-    printf("error: parsing htsFileList %s\n", htsFileList);
+    printf("error: parsing htsFilesList %s\n", htsFilesList);
     return(-1);
   }
+  printf("extractFeature(): Detect %d hts files\n", totalHtsFiles);
 
   /* extract feature */
-  modelMatrix = extract(trainingRegionsFile, htsFileList, totalHtsFiles);
+  extract(trainingRegionsFile, htsFiles, totalHtsFiles, modelMatrix);
 
   /* save feature */
-  saveModelMatrix(modelMatrix, htsFileList, totalHtsFiles, outputFile);
+  saveModelMatrix(modelMatrix, outputFile);
 
-  free(htsFiles);
+  freeHtsFiles(htsFiles, totalHtsFiles);
   free(modelMatrix);
   return 0;
 }
@@ -58,8 +52,8 @@ int saveModelMatrix(struct modelMatrix_ *modelMatrix, char *outputFile) {
   int i, j;
   FILE *outputFileFp = NULL;
 
-  if ((outputFileFp = fopen(outputFileName, "w")) == NULL) {
-    printf("Error: cannot open file %s\n", outputFileName);
+  if ((outputFileFp = fopen(outputFile, "w")) == NULL) {
+    printf("Error: cannot open file %s\n", outputFile);
     exit(EXIT_FAILURE);
   }
 
@@ -81,7 +75,7 @@ int saveModelMatrix(struct modelMatrix_ *modelMatrix, char *outputFile) {
   }
   
   fclose(outputFileFp);
-  printf("\nWriting features to output %s\n\n", outputFile);
+  printf("\nsaveModelMatrix(): Writing features to output %s\n\n", outputFile);
   
   return 0;
 }
@@ -90,177 +84,201 @@ int saveModelMatrix(struct modelMatrix_ *modelMatrix, char *outputFile) {
 /*                extract                  */
 /* extract features around training region */
 /*-----------------------------------------*/
-struct modelMatrix_ *extract(char *trainingRegionsFile, 
-      struct htsFile_ *htsFiles, int totalHtsFiles){
+int extract(char *trainingRegionsFile, struct htsFile_ *htsFiles, int totalHtsFiles, struct modelMatrix_ *modelMatrix){
   
   int i;
 
   /* read in training regions */
   int totalTrainingRegions;
-  FILE *trainingFileFp = NULL;
-  struct trainingRegion *trainingRegions = (struct trainingRegion *)calloc(MAX_TRAINING_REGIONS, sizeof(struct trainingRegion));
+  FILE *trainingRegionsFileFp = NULL;
+  struct trainingRegion_ *trainingRegions = (struct trainingRegion_ *)calloc(max_training_regions, sizeof(struct trainingRegion_));
   
-  if ((trainingFileFp = fopen(trainingFile, "r")) == NULL) {
-    printf("Error: cannot open file %s\n", trainingFile);
+  if ((trainingRegionsFileFp = fopen(trainingRegionsFile, "r")) == NULL) {
+    printf("Error: cannot open file %s\n", trainingRegionsFile);
     exit(EXIT_FAILURE);
   }
   i = 0;
-  while(!feof(trainingFileFp)) {  
+  while(!feof(trainingRegionsFileFp)) {  
     
-    if (i >= MAX_TRAINING_REGIONS) {
-      printf("Error: the number of training regions exceed the maximum allowed %d\n", MAX_TRAINING_REGIONS);
-      printf("i is %d\n", i);
-      exit(EXIT_FAILURE);
+    if (i >= max_training_regions) {
+      max_training_regions *= 2;
+      trainingRegions = (struct trainingRegion_ *)realloc(trainingRegions, max_training_regions*sizeof(struct trainingRegion_));
     }
 
-    if( (fscanf(trainingFileFp, "%d %d %d\n", &trainingRegions[i].chr, &trainingRegions[i].coordinate,&trainingRegions[i].response)) != 3) {
-      printf("error reading from %dth row from %s\n", i, trainingFile);
-      exit(EXIT_FAILURE);
+    if( (fscanf(trainingRegionsFileFp, "%d %d %d\n", &trainingRegions[i].chr, &trainingRegions[i].coordinate,&trainingRegions[i].response)) != 3) {
+      printf("error reading from %dth row from %s\n", i, trainingRegionsFile);
+      free(trainingRegions);
+      exit(-1);
     }
 
     i++;
   }
   totalTrainingRegions = i;
-  fclose(trainingFileFp);
+  fclose(trainingRegionsFileFp);
   
   /* extract features */
-  struct modelMatrix *modelMatrix = (struct modelMatrix *)calloc(1, sizeof(struct modelMatrix));
   modelMatrix->n = totalTrainingRegions;
-  // note windowSize's unit is bp
-  modelMatrix->p = (param->windowSize / param->resolution) * totalCoverages; 
+  for(i = 0; i < totalHtsFiles; i++) {
+    modelMatrix->p += (htsFiles[i].windowSize / htsFiles[i].resolution); 
+  }
 
   float **features = (float **)calloc(modelMatrix->n, sizeof(float *));
   for (i = 0; i < modelMatrix->n; i++) {
     features[i] = (float *)calloc(modelMatrix->p, sizeof(float));
   }
   
-  extract_core(features, trainingRegions, totalTrainingRegions, coverages, totalCoverages, param);
+  extract_core(features, trainingRegions, totalTrainingRegions, htsFiles, totalHtsFiles);
 
   /* return model matrix */
   modelMatrix->trainingRegions = trainingRegions;
   modelMatrix->features = features;
 
-  /* free pointers */
-  free(coverages);
-
   /* return model matrix pointer */
-  return modelMatrix;
+  return 0;
 }
 
 
 /*----------------------------*/
 /*     extract_core           */
 /*----------------------------*/
-int extract_core(float **features, struct trainingRegion *trainingRegions, 
-          int totalTrainingRegions, char **coverages, int totalCoverages, 
-          struct extractFeatureParam *param) {
+int extract_core(float **features, struct trainingRegion_ *trainingRegions, 
+          int totalTrainingRegions, struct htsFile_ *htsFiles, int totalHtsFiles) {
 
   int i, j, k;
   printf("\n");
-  printf("Extracting features for training regions:\n");
-  /* loop through each training region */
-  for (i = 0; i < totalTrainingRegions; i++){
+  printf("extract_core(): Extracting features for training regions,\n");
 
-    /* check training case */
-    if (trainingRegions[i].coordinate - param->windowSize / 2 < 0 &&
-      trainingRegions[i].coordinate + param->windowSize / 2 > chrlen[trainingRegions[i].chr - 1]) {
-      printf("Warning: cannot extract feature for training case %d %d %d, ignored\n",
-        trainingRegions[i].chr, trainingRegions[i].coordinate, trainingRegions[i].response);
-      exit(EXIT_FAILURE);
-    }
-
-    if((i+1) % 1000 == 0) {
-      printf("\tProcessing %dth training region\n", i+1);
-    }
-
-    /* find position for training region */
-    /* Note: position's unit is bin! not bp! */
-    int position = 0;
-    if (trainingRegions[i].chr >= 2) { // not chr1
-      for (j = 0; j < trainingRegions[i].chr - 1; j++) {
-        position += (int)(chrlen[j] / param->resolution) + 1;
-      }
-    }
-    // now position is in the training region
-    position += (int)((float)trainingRegions[i].coordinate / (float)param->resolution + 0.5);
-    // now change position to begining of the windowSize around training region
-    position -= (int)((float)(param->windowSize / 2) / (float)param->resolution + 0.5);
+  // note that we are using a name convention *.bam.coverage[Resolution]
+  FILE *coveragesFp[totalHtsFiles];
+  for(i = 0; i < totalHtsFiles; i++) {
+    char *tmpFilename = (char *)calloc(MAX_DIR_LEN, sizeof(char));
+    strcpy(tmpFilename, htsFiles[i].file);
+    strcat(tmpFilename, ".coverage");
+    char tmpResolution[5];
+    sprintf(tmpResolution, "%d", htsFiles[i].resolution);
+    strcat(tmpFilename, tmpResolution);
     
-    /* extract and write feature from each bam */
-    for (k = 0; k < totalCoverages; k++) {
-
-      FILE *coverageFp = NULL;
-      
-      if ((coverageFp = fopen(coverages[k], "rb")) == NULL) {
-        printf("Error: cannot open %s\n", coverages[k]);
+    if ((coveragesFp[i] = fopen(tmpFilename, "rb")) == NULL) {
+        printf("Error: cannot open %s\n", tmpFilename);
         printf("Info: run ./coverage -i bamfiles -p param\n");
-        exit(EXIT_FAILURE);
-      }
-      
-      fseek(coverageFp, position*sizeof(float), SEEK_SET);
-      
-      /* note windowSize's unit is bp not bins! */
-      fread(&features[i][(param->windowSize / param->resolution)*k], sizeof(float), param->windowSize / param->resolution, coverageFp);
-      
-      fclose(coverageFp);
+        return(-1);
     }
+
+    free(tmpFilename); 
   }
 
+  /* loop through each training region */
+  for (i = 0; i < totalTrainingRegions; i++){
+    if((i+1) % 1000 == 0) {
+      printf("\tprocessing %dth training region\n", i+1);
+    }
+    int featuresPos = 0; // record start pos for different coverage files
+    /* loop through each coverage file */
+    for (k = 0; k < totalHtsFiles; k++) {
+      // check boundary training case
+      if (trainingRegions[i].coordinate - htsFiles[k].windowSize / 2 < 0 &&
+        trainingRegions[i].coordinate + htsFiles[k].windowSize / 2 > chrlen[trainingRegions[i].chr - 1]) {
+        printf("Warning: cannot extract feature for boundary training case %d %d %d, ignored\n",
+          trainingRegions[i].chr, trainingRegions[i].coordinate, trainingRegions[i].response);
+        return(-1);
+      }
+      /* find position for training region */
+      // Note: position's unit is bin! not bp!
+      int position = 0;
+      if (trainingRegions[i].chr >= 2) { // not chr1
+        for (j = 0; j < trainingRegions[i].chr - 1; j++) {
+          position += (int)(chrlen[j] / htsFiles[k].resolution) + 1;
+        }
+      }
+      // now position is in the training region
+      position += (int)((float)trainingRegions[i].coordinate / (float)htsFiles[k].resolution + 0.5);
+      // now change position to begining of the windowSize around training region
+      position -= (int)((float)(htsFiles[k].windowSize / 2) / (float)htsFiles[k].resolution + 0.5);
+
+      fseek(coveragesFp[k], position*sizeof(float), SEEK_SET);
+      
+      /* note windowSize's unit is bp not bins! */
+      fread(&features[i][featuresPos], sizeof(float), htsFiles[k].windowSize / htsFiles[k].resolution, coveragesFp[k]);
+      featuresPos += htsFiles[k].windowSize / htsFiles[k].resolution;
+
+    } // end of loop of coverage files
+  } // end of loop of training regions
+
+  for(i = 0; i < totalHtsFiles; i++) {
+    fclose(coveragesFp[i]);
+  }
   return 0;
 }
 
 /*----------------------------*/
-/*       parseParam           */
-/*    parse param settings    */
+/*     parseHtsFile           */
+/* parse file param settings  */
 /*----------------------------*/
-int parseParam(char *paramFile, struct extractFeatureParam *param){
+int parseHtsFile(char *htsFileList, struct htsFile_ **htsFiles) {
 
-  FILE *paramFileFp = NULL;
+  FILE *htsFileListFp = NULL;
+  int idx = -1, totalHtsFiles = 0;
 
-  if ((paramFileFp = fopen(paramFile, "r")) == NULL) {
-    printf("Error: cannot open file %s\n", paramFile);
-    exit(EXIT_FAILURE);
+  if ((htsFileListFp = fopen(htsFileList, "r")) == NULL) {
+    printf("Error: cannot open file %s\n", htsFileList);
+    return(-1);
   }
 
-  // printf("\n\n/*------------------------------------*/\n");
-  while (!feof(paramFileFp)){
+  printf("\n\n/*-------------------------------------\n");
+  while (!feof(htsFileListFp)){
     char *name = (char *)calloc(MAX_DIR_LEN, sizeof(char));
     char *value = (char *)calloc(MAX_DIR_LEN, sizeof(char));
 
-    fscanf(paramFileFp, "%[^=]=%s\n", name, value);
+    if( (fscanf(htsFileListFp, "%[^=]=%s\n", name, value) != 2) ) {
+      printf("parseHtsFile: error reading in from %s\n", htsFileList);
+      free(name); free(value);
+      return(-1);
+    }
 
-    if (strcmp(name, "resolution") == 0){
-      param->resolution = atoi(value);
-      //printf("/* %s is %s\n", name, value);
+    if (strcmp(name, "file") == 0){
+      /* if idx exceeds max_hts_files 
+      realloc the memory, double the size */
+      if(idx == max_hts_files - 1) {
+        max_hts_files *= 2;
+        *htsFiles = (struct htsFile_ *)realloc(*htsFiles, max_hts_files*sizeof(struct htsFile_));
+      }
+      idx++; // whenever come across a "file=", add idx to htsFiles
+      (*htsFiles)[idx].file = (char *)calloc(MAX_DIR_LEN, sizeof(char));
+      strcpy((*htsFiles)[idx].file, value);
+      printf("/* %s is %s\n", name, value);
+    }
+    else if (strcmp(name, "resolution") == 0){
+      (*htsFiles)[idx].resolution = atoi(value);
+      printf("/* %s is %s\n", name, value);
     }
     else if (strcmp(name, "windowSize") == 0){
-      param->windowSize = atoi(value);
-      //printf("/* %s is %s\n", name, value);
+      (*htsFiles)[idx].windowSize = atoi(value);
+      printf("/* %s is %s\n", name, value);
     }
     else if (strcmp(name, "pairend") == 0) {
-      param->pairend = atoi(value);
-      //printf("/* %s is %s\n", name, value);
+      (*htsFiles)[idx].pairend = atoi(value);
+      printf("/* %s is %s\n", name, value);
     }
-    // added min max length of fragment for pairend data
+    // min max length of fragment for pairend data
     else if (strcmp(name, "min") == 0) {
-      param->min = atoi(value);
-      //printf("/* %s is %s\n", name, value);
+      (*htsFiles)[idx].min = atoi(value);
+      printf("/* %s is %s\n", name, value);
     }
     else if (strcmp(name, "max") == 0) {
-      param->max = atoi(value);
-      //printf("/* %s is %s\n", name, value);
+      (*htsFiles)[idx].max = atoi(value);
+      printf("/* %s is %s\n", name, value);
     }
     else {
-      //printf("/* Warning: unkown parameters %s=%s, ignored\n", name, value);
+      printf("/* Warning: unkown parameters %s=%s, ignored\n", name, value);
     }
-
     free(name);
     free(value);
   }
-  // printf("/*------------------------------------*/\n\n");
+  printf("/*-------------------------------------\n\n");
   
-  fclose(paramFileFp);
-  return 0;
+  fclose(htsFileListFp);
+  totalHtsFiles = idx+1;
+  return totalHtsFiles;
 }
 
 /*-------------------------------*/
@@ -270,62 +288,40 @@ int parseParam(char *paramFile, struct extractFeatureParam *param){
 /* output filename is the bam file name */
 /* plus '.coverage%d', resolution */
 /*-------------------------------*/
-int coverage(char *bamsFile, char *paramFile) {
+int coverage(char *htsFilesList) {
 
   int i;
-  int totalBams;
-  FILE *bamsFileFp = NULL;
-  char **bams = (char **)calloc(MAX_BAM_FILES, sizeof(char *));
-  for (i = 0; i < MAX_BAM_FILES; i++) {
-    bams[i] = (char *)calloc(MAX_DIR_LEN, sizeof(char));
-  }
+  int totalHtsFiles;
+  struct htsFile_ *htsFiles = (struct htsFile_ *)calloc(max_hts_files, sizeof(struct htsFile_));
 
   /* parse param file */
-  struct extractFeatureParam *param = (struct extractFeatureParam *)calloc(1, sizeof(struct extractFeatureParam));
-  parseParam(paramFile, param);
+  totalHtsFiles = parseHtsFile(htsFilesList, &htsFiles);
+  if(totalHtsFiles < 0 ) {
+    printf("error: parsing htsFilesList %s\n", htsFilesList);
+    return(-1);
+  }
+  printf("\nExtractFeature(): Detect %d hts files\n", totalHtsFiles);
   
-  /* read in input bam file names */
-  if ((bamsFileFp = fopen(bamsFile, "r")) == NULL){
-    printf("Error: cannot open file %s\n", bamsFile);
-    return EXIT_SUCCESS;
-  }
-
-  i = 0;
-  while (!feof(bamsFileFp)) {
-    if (i >= MAX_BAM_FILES) {
-      printf("Error: the number of input bam files exceeds the limit %d\n", i);
-      return EXIT_SUCCESS;
-    }
-    fscanf(bamsFileFp, "%s\n", bams[i]);
-    i++;
-  }
-  totalBams = i;
-  fclose(bamsFileFp);
-
   /* count coverage for each bam */
-  for (i = 0; i < totalBams; i++) {
+  for (i = 0; i < totalHtsFiles; i++) {
     // note the outputfile name convention here
     char *outputFileName = (char*)calloc(MAX_DIR_LEN, sizeof(char));
-    strcpy(outputFileName, bams[i]);
+    strcpy(outputFileName, htsFiles[i].file);
     strcat(outputFileName, ".coverage");
     char tmp[10];
-    sprintf(tmp, "%d", param->resolution);
+    sprintf(tmp, "%d", htsFiles[i].resolution);
     strcat(outputFileName, tmp);
 
-    printf("Calculating coverage for: \n\t%s and saving to %s\n", bams[i], outputFileName);
+    printf("coverage(): Calculating coverage for %s\n", htsFiles[i].file);
 
     /* count coverage */
-    coverage_core(bams[i], outputFileName, param);
+    coverage_core(htsFiles[i], outputFileName);
 
+    printf("coverage(): Saving coverage to %s\n", outputFileName);
     free(outputFileName);
   }
 
-  /* free mem */
-  for (i = 0; i < MAX_BAM_FILES; i++) {
-    free(bams[i]);
-  }
-  free(bams);
-
+  freeHtsFiles(htsFiles, totalHtsFiles);
   return EXIT_SUCCESS;
 }
 
@@ -339,41 +335,20 @@ int coverage(char *bamsFile, char *paramFile) {
 /* 01-16-2015 @UPDATE: added pair-end coverage counting */
 /* @NOTE: float is 4 byte on jhpce01 */
 /*--------------------------------*/
-int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param) {
+int coverage_core(struct htsFile_ htsFile, char *outputFile) {
 
   int i, j;
-
-  /* write num of bins at specified resolution */
-  /*
-  FILE *binNumFp = NULL;
-  char *binNumFileName = (char *)calloc(MAX_DIR_LEN, sizeof(char));
-  char *binSizeStr = (char *)calloc(10, sizeof(char));
-  sprintf(binSizeStr, "%d", param->resolution);
-  strcpy(binNumFileName, "binNum");
-  strcat(binNumFileName, binSizeStr);
-  strcat(binNumFileName, "bp");
-  if ((binNumFp = fopen(binNumFileName, "w")) == NULL) {
-    printf("cannot open %s\n", binNumFileName);
-    return EXIT_SUCCESS;
-  }
-  for (i = 0; i < NUM_SEQ; i++) {
-    fprintf(binNumFp, "%d\n", (int)(chrlen[i] / param->resolution) + 1);
-  }
-  fclose(binNumFp);
-  free(binSizeStr);
-  free(binNumFileName);
-  */
 
   /* open bam */
   samfile_t *bamFp = NULL;
 
   float **binCnt = (float **)calloc(NUM_SEQ, sizeof(float *));
   for (i = 0; i < NUM_SEQ; i++) {
-    binCnt[i] = (float *)calloc(((int)(chrlen[i] / param->resolution) + 1), sizeof(float));
+    binCnt[i] = (float *)calloc(((int)(chrlen[i] / htsFile.resolution) + 1), sizeof(float));
   }
 
-  if ((bamFp = samopen(bam, "rb", 0)) == NULL) {
-    printf("Error: Cannot open the file %s\n", bam);
+  if ((bamFp = samopen(htsFile.file, "rb", 0)) == NULL) {
+    printf("Error: Cannot open the file %s\n", htsFile.file);
     return EXIT_SUCCESS;
   }
 
@@ -399,7 +374,7 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
 
   read = bam_init1();
 
-  if(param->pairend == 0) {
+  if(htsFile.pairend == 0) {
     while (samread(bamFp, read) > 0) {
       if (read->core.tid < 0 || read->core.tid > 23) {
         continue;
@@ -408,8 +383,8 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
       /* increment signals at all covered bins */
       if (tidmap[read->core.tid] < NUM_SEQ) {
         int startBin, endBin;
-        startBin = (int)((float)read->core.pos / (float)param->resolution + 0.5);
-        endBin = (int)((float)(read->core.pos + read->core.l_qseq) / (float)param->resolution + 0.5);
+        startBin = (int)((float)read->core.pos / (float)htsFile.resolution + 0.5);
+        endBin = (int)((float)(read->core.pos + read->core.l_qseq) / (float)htsFile.resolution + 0.5);
 
         int b;
         for(b = startBin; b <= endBin; b++) {
@@ -423,7 +398,7 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
     }
   }
 
-  if(param->pairend == 1) {
+  if(htsFile.pairend == 1) {
     // added for pair end coverage counting
     int is2ndMate = 0;
     while (samread(bamFp, read) > 0) {
@@ -438,7 +413,7 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
           continue;
         } 
         else {
-          uint32_t left, right;
+          int left, right;
           if(read->core.pos > read->core.mpos) {
             left = read->core.mpos;
             right = read->core.pos;
@@ -448,13 +423,13 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
             right = read->core.mpos;
           }
           // filter out fragments with specified [min,max]
-          if(right - left + read->core.l_qseq < param->min || right - left + read->core.l_qseq > param->max) {
+          if(right - left + read->core.l_qseq < htsFile.min || right - left + read->core.l_qseq > htsFile.max) {
             is2ndMate = 1;
             continue;
           }
           int startBin, endBin;
-          startBin = (int)((float) left / (float)param->resolution + 0.5);
-          endBin = (int)((float)(right + read->core.l_qseq) / (float)param->resolution + 0.5);
+          startBin = (int)((float) left / (float)htsFile.resolution + 0.5);
+          endBin = (int)((float)(right + read->core.l_qseq) / (float)htsFile.resolution + 0.5);
           is2ndMate = 1;
           int b;
           // printf("startBin is %d and endBin is %d\n", startBin, endBin);
@@ -475,7 +450,7 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
 
   /* take log2 of coverage */
   for(i = 0; i < NUM_SEQ; i++) {
-    for(j = 0; j < (int)(chrlen[i] / param->resolution) + 1; j++) {
+    for(j = 0; j < (int)(chrlen[i] / htsFile.resolution) + 1; j++) {
       binCnt[i][j] = (float)(log2((double)(binCnt[i][j]+1)));
     }
   }
@@ -489,7 +464,7 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
   }
 
   for (i = 0; i < NUM_SEQ; i++) {
-    fwrite(binCnt[i], sizeof(float), ((int)(chrlen[i] / param->resolution) + 1), binCntFp);
+    fwrite(binCnt[i], sizeof(float), ((int)(chrlen[i] / htsFile.resolution) + 1), binCntFp);
   }
   fclose(binCntFp);
 
@@ -502,3 +477,19 @@ int coverage_core(char *bam, char *outputFile, struct extractFeatureParam *param
   return 0;
 }
 
+
+
+/*------------------------------------------*/
+/*      freeHtsFiles(htsFiles)              */
+/* cannot use free() directly,              */
+/* because parseHtsFile() dynamically       */
+/* allocates memory to the file component   */
+/* of the htsFile                           */
+/*------------------------------------------*/
+void freeHtsFiles(struct htsFile_ *htsFiles, int totalHtsFiles) {
+  int i;
+  for(i = 0; i < totalHtsFiles; i++) {
+    free(htsFiles[i].file);
+  }
+  free(htsFiles);
+}
