@@ -18,7 +18,8 @@
 #include "./liblinear-1.96/tron.h"
 
 // #define NUM_THREADS NUM_SEQ
-#define Num_THREADS 3
+#define NUM_THREADS 3
+
 // create thread argument struct for thr_func()
 struct thread_data_ {
   int chr; 
@@ -112,6 +113,7 @@ int menu_predictModelWholeGenome(int argc, char **argv) {
   struct htsFile_ *htsFiles = (struct htsFile_ *)calloc(max_hts_files, sizeof(struct htsFile_));
   totalHtsFiles = parseHtsFile(htsFilesList, &htsFiles);
 
+  printf("predictModelGenomeWide(): Detect %d htsFiles\n", totalHtsFiles);
   /* creat thread */
   int i, rc; // rc for holding error code
   for(i = 0; i < NUM_THREADS; i++) {
@@ -154,6 +156,7 @@ int menu_predictModelWholeGenome(int argc, char **argv) {
   free(htsFilesList);
 	free(outputFile);
   free(predResult);
+  freeHtsFiles(htsFiles, totalHtsFiles);
 
 	return 0;
 }
@@ -172,16 +175,25 @@ int menu_predictModelWholeGenome(int argc, char **argv) {
 void *predictModelWholeGenome(void *arg) {
   struct thread_data_ *data = (struct thread_data_ *) arg;
 
-  // printf("data->trainedModel is %s\n", data->trainedModel);
-  // printf("data->chr is %d\n", data->chr);
+  // utility var
+  int i,j,k;
+  
+  // print thread_data
+  printf("/*--------------------------------------------*/\n");
+  printf("/* data->trainedModel is %s\n", data->trainedModel);
+  printf("/* data->chr is %d\n", data->chr);
+  printf("/* data->totalHtsFiles is %d\n", data->totalHtsFiles);
+  // for(i = 0; i < data->totalHtsFiles; i++) {
+    // printf("/* \thtsFile %d: file %s\n", i, (data->htsFiles)[i].file);
+    // printf("/* \thtsFile %d: resolution %d\n", i, (data->htsFiles)[i].resolution);
+    // printf("/* \thtsFile %d: windowSize %d\n", i, (data->htsFiles)[i].windowSize);
+  // }
+  printf("/*--------------------------------------------*/\n");
 
   char *trainedModel = data->trainedModel;
   struct htsFile_ *htsFiles = data->htsFiles;
   int chr = data->chr;
   int totalHtsFiles = data->totalHtsFiles;
-
-  // utility var
-  int i,j,k;
  
   // trainedModel
   struct model *mymodel;
@@ -283,7 +295,7 @@ void *predictModelWholeGenome(void *arg) {
   for(i = 0; i < totalHtsFiles; i++) {
     fclose(coverageFps[i]);
   }
-  freeHtsFiles(htsFiles, totalHtsFiles);
+
   free(prob_estimates);
   // give address of pointer to this function, so that the function can free the pointer.
   free_and_destroy_model(&mymodel); 
