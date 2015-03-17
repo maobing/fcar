@@ -27,6 +27,10 @@ struct extractFeatureParam {
   
   /* max fragment length filter for pairend */
   int max;
+
+  // 0: only count forward strand
+  // 1: only count backward strand
+  int strand;
 };
 
 /* training region */
