@@ -1,4 +1,6 @@
 *.sh.p*
 *.sh.e*
 *.sh.o*
+./rt-rank_1.5/evtools.pyc
+./createBenchmarkFeature.pyc
 
