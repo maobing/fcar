@@ -38,6 +38,7 @@ int menu_trainModel(int argc, char **argv) {
 		printf("/*    LogisticRegressionL2          */\n");
 		printf("/*    SVM                           */\n");
 		printf("/*    RandomForest                  */\n");
+		printf("/*    L1SVR                         */\n");
 		printf("/* -c penalty tuning                */\n");
 		printf("/* -t training data file            */\n");
 		printf("/* -o output model                  */\n");
@@ -126,6 +127,11 @@ int trainModel(char *method, float c, char *trainingFile, char *outputFile) {
 		strcpy(cmd, "./liblinear-1.96/train -s 5 -c "); // L1 penalized SVM
 		strcat(cmd, strC);
 	}
+  // added SVR
+  else if (strcmp(method, "L1SVR") == 0) {
+		strcpy(cmd, "./liblinear-1.96/train -s 13 -c "); //
+		strcat(cmd, strC);
+  }
 	else if (strcmp(method, "RandomForest") == 0) {
 		printf("Info: c is not used in RandomForest\n");
 		strcpy(cmd, "python ./rt-rank_1.5/do_forest.py ");

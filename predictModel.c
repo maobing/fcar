@@ -39,7 +39,8 @@ int menu_predictModel(int argc, char **argv) {
 		printf("/*    LogisticRegressionL1            */\n");
 		printf("/*    LogisticRegressionL2            */\n");
 		printf("/*    SVM                             */\n");
-		printf("/*    RandomFores                     */\n");
+		printf("/*    RandomForest                    */\n");
+		printf("/*    L1SVR                           */\n");
     printf("/* -tm trainedModel                   */\n");
     printf("/* -train trainFile                   */\n");
     printf("/* -test testFile                     */\n");
