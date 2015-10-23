@@ -206,7 +206,12 @@ def collectResults(trainFile, testFile, model) :
     file = open(tmpResultFile, "r")
     if re.match(r"LogisticRegression|Benchmark", mymodel) :
       tmp = file.read().splitlines()
-      result.append([ float(x.split(' ')[1]) for x in tmp[1:] ])
+      labels = tmp[0].split(' ')
+      if labels[1] == '1':
+        labelIdx = 1
+      if labels[2] == '1':
+        labelIdx = 2
+      result.append([ float(x.split(' ')[labelIdx]) for x in tmp[1:] ])
     else :
       result.append([ float(x) for x in file.read().splitlines()] )
     file.close()
