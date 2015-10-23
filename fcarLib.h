@@ -33,7 +33,7 @@ struct extractFeatureParam {
 struct trainingRegion{
 	int chr;
 	int coordinate;
-	int response;
+	float response;
 };
 
 /* model matrix */

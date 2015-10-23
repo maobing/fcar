@@ -86,7 +86,7 @@ int saveModelMatrix(struct modelMatrix *modelMatrix, struct extractFeatureParam 
   // changed input format to below: 
   // 1 1:1.234 2:3.497
   for (i = 0; i < modelMatrix->n; i++) {
-    fprintf(outputFileFp, "%d ", modelMatrix->trainingRegions[i].response);
+    fprintf(outputFileFp, "%f ", modelMatrix->trainingRegions[i].response);
     for (j = 0; j < modelMatrix->p-1; j++) {
       fprintf(outputFileFp, "%d:%.4f ", j+1, modelMatrix->features[i][j]);
     }
@@ -152,7 +152,7 @@ struct modelMatrix *extract(char *coveragesFile, char *trainingFile,
       exit(EXIT_FAILURE);
     }
 
-    if( (fscanf(trainingFileFp, "%d %d %d\n", &trainingRegions[i].chr, &trainingRegions[i].coordinate,&trainingRegions[i].response)) != 3) {
+    if( (fscanf(trainingFileFp, "%d %d %f\n", &trainingRegions[i].chr, &trainingRegions[i].coordinate,&trainingRegions[i].response)) != 3) {
       printf("error reading from %dth row from %s\n", i, trainingFile);
       exit(EXIT_FAILURE);
     }
@@ -206,7 +206,7 @@ int extract_core(float **features, struct trainingRegion *trainingRegions,
     /* check training case */
     if (trainingRegions[i].coordinate - param->windowSize / 2 < 0 &&
       trainingRegions[i].coordinate + param->windowSize / 2 > chrlen[trainingRegions[i].chr - 1]) {
-      printf("Warning: cannot extract feature for training case %d %d %d, ignored\n",
+      printf("Warning: cannot extract feature for training case %d %d %f, ignored\n",
         trainingRegions[i].chr, trainingRegions[i].coordinate, trainingRegions[i].response);
       exit(EXIT_FAILURE);
     }
