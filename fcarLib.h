@@ -1,10 +1,14 @@
+#include "stdint.h"
+
 /*-----------------------------*/
 /*         macro               */
 /*-----------------------------*/
-#define MAX_DIR_LEN 255
+#define MAX_DIR_LEN 1000
 #define MAX_BAM_FILES 400
 #define MAX_TRAINING_REGIONS 1000000
 #define NUM_SEQ 23 // chrY & chrM excluded
+
+extern const uint32_t chrlen[];
 
 /*-----------------------------*/
 /*         struct              */
