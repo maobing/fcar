@@ -323,6 +323,9 @@ void *predictModelWholeGenome(void *arg) {
     } // end of loop through coverageFiles
     // printf("\n");
     myX[idx].index = -1; // a flag for end of features
+
+
+   
     if(idx == 0) {
       // printf("idx is %d\n",idx);
       predResult[j] = 0.0;
@@ -330,6 +333,19 @@ void *predictModelWholeGenome(void *arg) {
       continue;
     }
     // printf("nr_feature is %d\n", idx);
+    
+    // added 11-05-2015, add a function for getting average
+    idx = 0;
+    double mean = 0.0;
+    while(myX[idx].index != -1) {
+      mean += myX[idx].value;
+      idx++;
+    }
+    mean = mean/double(idx);
+    myX[0].value = mean;
+    myX[1].value = -1;
+    //----------------
+    
     predict_probability(mymodel, myX, prob_estimates);
     // printf("num of feature is %d\n", get_nr_feature(mymodel));
     // printf("num of class is %d\n", get_nr_class(mymodel));

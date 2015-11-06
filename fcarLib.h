@@ -4,7 +4,7 @@
 #define MAX_DIR_LEN 255
 #define MAX_BAM_FILES 400
 #define MAX_TRAINING_REGIONS 1000000
-#define NUM_SEQ 23 // chrY & chrM excluded
+#define NUM_SEQ 20 // chrY & chrM excluded, mm9
 
 /*-----------------------------*/
 /*         struct              */
