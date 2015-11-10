@@ -375,6 +375,7 @@ void *predictModelWholeGenome(void *arg) {
       printf("predResult[%d] is %f\n", j, predResult[j]);
     }*/
     free(myX);
+    free(mylabel);
   }
 
 

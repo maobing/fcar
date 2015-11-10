@@ -333,8 +333,16 @@ void *predictModelWholeGenome(void *arg) {
     predict_probability(mymodel, myX, prob_estimates);
     // printf("num of feature is %d\n", get_nr_feature(mymodel));
     // printf("num of class is %d\n", get_nr_class(mymodel));
-    predResult[j] = prob_estimates[0];
+    int *mylabel = (int *)calloc(10, sizeof(int));
+    get_labels(mymodel, mylabel);
+    if(mylabel[0] == 1) {
+      predResult[j] = prob_estimates[0];
+    } else {
+      predResult[j] = prob_estimates[1];
+    }
+ 
     free(myX);
+    free(mylabel);
   }
 
 
