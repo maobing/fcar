@@ -16,7 +16,7 @@
 #include "./liblinear-1.96/linear.h"
 #include "./liblinear-1.96/tron.h"
 
-// define the size of my pool of threads, 23, one per chr
+// define the size of my pool of threads, 23
 #define NUM_THREADS 23
 
 // use extern in fcar.h
@@ -204,13 +204,13 @@ int menu_predictModelWholeGenome(int argc, char **argv) {
 
 void *predictModelWholeGenome(void *arg) {
   thread_data_t *data = (thread_data_t *) arg;
-
+  /*
   printf("data->trainedModel is %s\n", data->trainedModel);
   printf("data->coverageFileList is %s\n", data->coverageFileList);
   printf("data->trainFile %s\n", data->trainFile);
   printf("data->paramFile %s\n", data->paramFile);
   printf("data->chr is %d\n", data->chr);
-
+  */
   char *trainedModel = data->trainedModel;
   char *coverageFileList = data->coverageFileList;
   // char *trainFile = data->trainFile;
@@ -285,10 +285,12 @@ void *predictModelWholeGenome(void *arg) {
 
   // read in feature for each bin and do prediction
   for(j = 0; j < (int)(chrlen[chr] / param->resolution) + 1; j++) {
-    if(j % 100000 == 0) {
+    /*
+      if(j % 100000 == 0) {
       printf("Predicting chr%d:%dth bin\n", chr,j);
       fflush(stdout);
-    }
+    }*/
+
     int max_nr_feature = 100;
     struct feature_node *myX = (struct feature_node *)calloc(max_nr_feature, sizeof(struct feature_node));
     int idx = 0;
@@ -323,6 +325,9 @@ void *predictModelWholeGenome(void *arg) {
     } // end of loop through coverageFiles
     // printf("\n");
     myX[idx].index = -1; // a flag for end of features
+
+
+   
     if(idx == 0) {
       // printf("idx is %d\n",idx);
       predResult[j] = 0.0;
@@ -330,9 +335,34 @@ void *predictModelWholeGenome(void *arg) {
       continue;
     }
     // printf("nr_feature is %d\n", idx);
+    
+    // added 11-05-2015, add a function for getting average
+    idx = 0;
+    double mean = 0.0;
+    while(myX[idx].index != -1) {
+      mean += myX[idx].value;
+      idx++;
+    }
+    mean = mean/double(totalCoverageFiles*(param->windowSize/param->resolution) + param->windowSize/param->resolution + 1);
+    // printf("mean is %f\n", mean);
+    myX[0].index = 1;
+    myX[0].value = mean;
+    myX[1].index = -1;
+
+    idx = 0;
+    /* while(myX[idx].index != -1) {
+      printf("myX[%d].index is %d, myX[%d].value is %f\n", idx, myX[idx].index, idx, myX[idx].value);
+    }*/
+
+    //----------------
+    
     predict_probability(mymodel, myX, prob_estimates);
     // printf("num of feature is %d\n", get_nr_feature(mymodel));
     // printf("num of class is %d\n", get_nr_class(mymodel));
+    //
+    // IMPORTANTE: need to check model.label to see which estimate
+    //     we shoud take
+    
     int *mylabel = (int *)calloc(10, sizeof(int));
     get_labels(mymodel, mylabel);
     if(mylabel[0] == 1) {
@@ -340,7 +370,10 @@ void *predictModelWholeGenome(void *arg) {
     } else {
       predResult[j] = prob_estimates[1];
     }
- 
+
+    /* if(predResult[j] > 0.51) {
+      printf("predResult[%d] is %f\n", j, predResult[j]);
+    }*/
     free(myX);
     free(mylabel);
   }
@@ -360,4 +393,3 @@ void *predictModelWholeGenome(void *arg) {
   free_and_destroy_model(&mymodel); 
   pthread_exit((void *) predResult);
 }
-
